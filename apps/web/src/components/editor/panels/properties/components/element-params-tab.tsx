@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useEditor } from "@/editor/use-editor";
+import { useElementPreview } from "@/timeline/hooks/use-element-preview";
 import { useTranslation } from "@/i18n";
 import { resolveAnimationPathValueAtTime } from "@/animation";
 import { Section, SectionContent, SectionFields } from "@/components/section";
@@ -20,7 +21,7 @@ import type { TimelineElement } from "@/timeline";
 import type { MediaTime } from "@/wasm";
 
 export function ElementParamsTab({
-	element,
+	element: committedElement,
 	trackId,
 	paramKeys,
 	sectionKey,
@@ -32,6 +33,11 @@ export function ElementParamsTab({
 }) {
 	const editor = useEditor();
 	const t = useTranslation();
+	const { renderElement: element } = useElementPreview({
+		trackId,
+		elementId: committedElement.id,
+		fallback: committedElement,
+	});
 	const { localTime, isPlayheadWithinElementRange } = useElementPlayhead({
 		startTime: element.startTime,
 		duration: element.duration,
@@ -46,7 +52,7 @@ export function ElementParamsTab({
 			<SectionContent className="pt-4">
 				{element.type === "text" && sectionKey === "text" && (
 					<div className="mb-3 space-y-2 px-3">
-						<p className="text-xs text-muted-foreground">{t("Double-click subtitles in the preview to edit. Click outside to save; Escape cancels. Undo with ⌘Z.")}</p>
+						<p className="text-xs text-muted-foreground">{t("Edit content below to update the subtitle preview instantly. Click outside to save; undo with ⌘Z / Ctrl+Z. You can also double-click subtitles in the preview.")}</p>
 						<Button variant="outline" size="sm" onClick={() => {
 							editor.timeline.commitPreview();
 							const track = editor.scenes.getActiveScene().tracks.overlay.find((item) => item.id === trackId);
@@ -93,6 +99,7 @@ function ElementParamField({
 	localTime: MediaTime;
 	isPlayheadWithinElementRange: boolean;
 }) {
+	const editor = useEditor();
 	const resolvedValue = resolveAnimationPathValueAtTime({
 		animations: element.animations,
 		propertyPath: param.key,
@@ -118,6 +125,11 @@ function ElementParamField({
 			value={resolvedValue}
 			onPreview={animatedParam.onPreview}
 			onCommit={animatedParam.onCommit}
+			onFocus={param.key === "content" ? () => {
+				editor.playback.pause();
+				if (!isPlayheadWithinElementRange)
+					editor.playback.seek({ time: element.startTime });
+			} : undefined}
 			keyframe={
 				param.keyframable === false
 					? undefined

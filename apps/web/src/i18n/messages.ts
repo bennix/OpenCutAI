@@ -33,6 +33,7 @@ export const messages: [string, string][] = [
  ["Mixed values · adjusting this property makes it uniform", "当前属性值不同 · 修改后将统一"],
  ["This track has no shared editable properties yet.", "此轨道暂时没有可统一修改的属性。"],
 	["Apply style to entire subtitle track", "将样式应用到整条字幕轨道"],
+	["Edit content below to update the subtitle preview instantly. Click outside to save; undo with ⌘Z / Ctrl+Z. You can also double-click subtitles in the preview.", "直接编辑下方内容，字幕预览实时更新。点击外部保存，⌘Z / Ctrl+Z 撤销；也可双击预览字幕编辑。"],
 	["Double-click subtitles in the preview to edit. Click outside to save; Escape cancels. Undo with ⌘Z.", "双击预览中的字幕即可编辑，点击外部保存，Esc 取消，⌘Z 撤销。"],
 	["Text Shadow", "文字阴影"],
 	["Shadow Color", "阴影颜色"],

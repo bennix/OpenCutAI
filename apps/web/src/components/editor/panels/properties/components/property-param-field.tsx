@@ -36,12 +36,14 @@ export function PropertyParamField({
 	value,
 	onPreview,
 	onCommit,
+	onFocus,
 	keyframe,
 }: {
 	param: ParamDefinition;
 	value: ParamValue;
 	onPreview: (value: ParamValue) => void;
 	onCommit: () => void;
+	onFocus?: () => void;
 	keyframe?: {
 		isActive: boolean;
 		isDisabled: boolean;
@@ -68,6 +70,7 @@ export function PropertyParamField({
 				value={value}
 				onPreview={onPreview}
 				onCommit={onCommit}
+				onFocus={onFocus}
 			/>
 		</SectionField>
 	);
@@ -78,11 +81,13 @@ function ParamInput({
 	value,
 	onPreview,
 	onCommit,
+	onFocus,
 }: {
 	param: ParamDefinition;
 	value: ParamValue;
 	onPreview: (value: ParamValue) => void;
 	onCommit: () => void;
+	onFocus?: () => void;
 }) {
 	if (param.type === "number" && param.key === "volume") {
 		return <VolumeParamField param={param} value={Number(value)} onPreview={onPreview} onCommit={onCommit} />;
@@ -152,7 +157,9 @@ function ParamInput({
 	if (param.type === "text") {
 		return (
 			<Textarea
+				aria-label={param.label}
 				value={String(value)}
+				onFocus={onFocus}
 				onChange={(event) => onPreview(event.currentTarget.value)}
 				onBlur={onCommit}
 			/>
