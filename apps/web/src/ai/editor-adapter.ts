@@ -289,17 +289,20 @@ export async function generate({
 	);
 	status("正在调用 ZenMux…");
 	const data = await zenmux({ path: spec.path, body: spec.body, signal });
-	const output = JSON.parse(
-		decodeGenerationResponse(JSON.stringify(data), input.kind),
-	);
-	if (input.kind === "edit") {
-		return JSON.parse(validateEditPlan(output.plan, JSON.stringify(metadata)));
-	}
+	// Persist the provider task ID before parsing a queued response or polling.
+	// A queued response may not contain media yet; losing its ID can cause a
+	// second paid submission when the user retries after a parser failure.
 	if (spec.pollPath) {
 		if (typeof data.id !== "string") throw new Error("视频任务没有返回 ID");
 		const job = { id: data.id, input, projectId };
 		storeJob({ job });
 		return resumeVideo({ editor, job, signal, status });
+	}
+	const output = JSON.parse(
+		decodeGenerationResponse(JSON.stringify(data), input.kind),
+	);
+	if (input.kind === "edit") {
+		return JSON.parse(validateEditPlan(output.plan, JSON.stringify(metadata)));
 	}
 	if (!output.media)
 		throw new Error("模型尚未返回素材，请在平台查看交互任务状态");

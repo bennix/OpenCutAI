@@ -23,7 +23,7 @@
     "test": "bun test",
     "build:ai": "bun run scripts/build-ai.ts",
     "mcp": "bun run scripts/mcp.ts",
-    "test:ai": "cargo test -p opencut-ai && bun test apps/web/src/ai/__tests__ scripts/mcp.test.ts",
+    "test:ai": "cargo test -p opencut-ai && bun run scripts/test-ai.ts",
     "dev:desktop": "electron apps/electron",
     "package:desktop": "bun run scripts/package-desktop.ts"
   },
