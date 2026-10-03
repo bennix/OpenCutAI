@@ -61,6 +61,8 @@ async function signEmbeddedLibraries(directory: string) {
 if (process.platform === "darwin") await signEmbeddedLibraries(resolve(root, "apps/web/.next/standalone"));
 await run([
 	process.platform === "win32" ? "tar.exe" : "/usr/bin/tar",
+	// Dereference Windows junctions: archived absolute targets cannot survive installation.
+	...(process.platform === "win32" ? ["-h"] : []),
 	"-czf",
 	resolve(root, "apps/electron/web.tar.gz"),
 	"-C",
