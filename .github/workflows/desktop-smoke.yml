@@ -61,7 +61,7 @@ jobs:
           if (!(Test-Path $executable)) { throw 'Installer did not create application' }
           $process = Start-Process -FilePath $executable -ArgumentList '--enable-logging', '--log-file=electron-smoke.log' -WorkingDirectory $destination -PassThru
           Write-Host "Started process $($process.Id)"
-          for ($attempt = 0; $attempt -lt 90; $attempt++) {
+          for ($attempt = 0; $attempt -lt 30; $attempt++) {
             try {
               $response = Invoke-WebRequest http://127.0.0.1:3002/projects -TimeoutSec 2
               if ($response.StatusCode -eq 200 -and $response.Content.Contains('<html')) { Stop-Process -Id $process.Id -ErrorAction SilentlyContinue; exit 0 }
@@ -72,4 +72,13 @@ jobs:
           Get-ChildItem $destination -Recurse -Filter '*log*' | ForEach-Object { Write-Host $_.FullName; Get-Content $_.FullName -ErrorAction SilentlyContinue }
           Get-ChildItem $env:APPDATA -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.Name -eq 'server.log' -or $_.Name -eq '.ready' } | ForEach-Object { Write-Host $_.FullName; Get-Content $_.FullName }
           Write-Host "Process exited: $($process.HasExited), exit code: $($process.ExitCode)"
-          throw 'Packaged editor did not start'
+          $serverFile = Get-ChildItem $env:APPDATA -Filter server.js -Recurse | Where-Object { $_.FullName -match 'apps[\\/]web[\\/]server.js$' } | Select-Object -First 1
+          if ($serverFile) {
+            Write-Host "Testing embedded server independently: $($serverFile.FullName)"
+            $env:PORT = '3003'; $env:HOSTNAME = '127.0.0.1'
+            $nodeProcess = Start-Process node -ArgumentList $serverFile.FullName -WorkingDirectory $serverFile.DirectoryName -RedirectStandardOutput "$destination/node-out.log" -RedirectStandardError "$destination/node-error.log" -PassThru
+            Start-Sleep 15
+            Get-Content "$destination/node-out.log", "$destination/node-error.log"
+            Stop-Process -Id $nodeProcess.Id -ErrorAction SilentlyContinue
+          }
+          throw 'Packaged editor did not start' 
