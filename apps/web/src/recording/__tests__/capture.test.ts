@@ -14,6 +14,8 @@ mock.module("../spool", () => ({
 }));
 const { startCapture } = await import("../capture");
 class Track {
+	readyState = "live";
+	enabled = true;
 	stopped = false;
 	onended: (() => void) | null = null;
 	stop() {
@@ -29,7 +31,7 @@ class Stream {
 		return this.tracks.slice(0, 1);
 	}
 	getAudioTracks() {
-		return this.tracks.slice(1);
+		return this.tracks.length === 1 ? this.tracks : this.tracks.slice(1);
 	}
 }
 class Recorder {
@@ -75,6 +77,7 @@ async function environment({
 }) {
 	const display = new Stream([new Track(), ...(system ? [new Track()] : [])]),
 		mic = new Stream([new Track()]);
+	if (!system) display.getAudioTracks = () => [];
 	const values = {
 		window: { opencutDesktop: undefined },
 		navigator: {
@@ -133,6 +136,7 @@ test("screen, microphone and system tracks pause together and stop once", async 
 				onEnded: () => {},
 			});
 			expect(Recorder.created.length).toBe(3);
+			expect(Recorder.created[2].stream).toBe(mic);
 			session.pause(true);
 			expect(Recorder.created.every((item) => item.state === "paused")).toBe(
 				true,
@@ -174,5 +178,17 @@ test("unavailable requested system audio reports failure and releases capture", 
 			expect(display.getTracks().every((track) => track.stopped)).toBe(true);
 		},
 		system: false,
+	});
+});
+test("unavailable microphone fails instead of silently recording only system audio", async () => {
+	await environment({
+		run: async (display, mic) => {
+			mic.tracks[0].readyState = "ended";
+			await expect(startCapture({
+				systemAudio: true, microphone: true, smartFocus: false,
+				region: { x: 0, y: 0, width: 1, height: 1 }, onEnded: () => {},
+			})).rejects.toThrow("没有取得有效的麦克风音轨");
+			expect([...display.getTracks(), ...mic.getTracks()].every(track => track.stopped)).toBe(true);
+		},
 	});
 });

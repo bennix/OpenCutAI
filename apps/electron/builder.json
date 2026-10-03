@@ -39,6 +39,8 @@
     },
     "icon": "apps/electron/assets/app.icns",
     "hardenedRuntime": true,
+    "entitlements": "apps/electron/entitlements.mac.plist",
+    "entitlementsInherit": "apps/electron/entitlements.mac.plist",
     "notarize": false,
     "signIgnore": [
       "\\.pak$",

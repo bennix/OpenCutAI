@@ -135,8 +135,16 @@ export async function startCapture({
 			throw new Error("System audio is unavailable for this capture source");
 		let mic: MediaStream | undefined;
 		if (microphone) {
-			mic = await navigator.mediaDevices.getUserMedia({ audio: true });
+			try {
+				mic = await navigator.mediaDevices.getUserMedia({ audio: true });
+			} catch (error) {
+				if (error instanceof DOMException && error.name === "NotAllowedError")
+					throw new Error("无法访问麦克风，请在系统隐私设置中允许 OpenCut AI 使用麦克风，然后重新启动应用");
+				throw error;
+			}
 			streams.push(mic);
+			if (!mic.getAudioTracks().some((track) => track.readyState === "live" && track.enabled))
+				throw new Error("没有取得有效的麦克风音轨，请检查输入设备及麦克风权限");
 			for (const track of mic.getAudioTracks())
 				track.onended = () =>
 					onHealth?.("麦克风音轨已断开，已录内容仍可保存", true);
