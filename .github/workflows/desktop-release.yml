@@ -5,7 +5,7 @@ on:
       tag:
         description: Existing GitHub release tag
         required: true
-        default: v0.1.10
+        default: v0.1.11
       platform:
         description: Platform to build
         type: choice
