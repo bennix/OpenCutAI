@@ -10,6 +10,28 @@ An open-source desktop video editor with AI storyboards, screen recording, edita
 - Local editing needs no subscription. AI generation requires your own provider/API credentials.
 - Screen/system-audio capture support depends on the operating system; Linux Wayland/portal support varies.
 
+## AI integration and limits
+
+The current application connects through **[ZenMux](https://zenmux.ai)** (`https://zenmux.ai/api/v1`). Save a **ZenMux API Key** in Settings → ZenMux AI; separate provider keys are not required. Model calls are billed to your ZenMux account. Prompts and reference media leave your device; keys are stored locally and excluded from project exports.
+
+| Use | Preset model IDs | Application behavior |
+| --- | --- | --- |
+| Video | `minimax/minimax-h3-max` | `/videos`; 5–15 seconds per shot; 480p or 768p (default) |
+| Video | `google/gemini-omni-1.1-flash-preview` | `/interactions`; duration and aspect ratio are creative preferences, not guaranteed output constraints |
+| Image | `openai/gpt-image-2.5-flare`, `openai/gpt-image-2.5-sunburst`, `google/gemini-3.1-flash-image` | Image generation / Google generateContent routes; dimensions depend on the model |
+| Planning | `openai/gpt-6.1-sol`, `anthropic/claude-sonnet-5.5` | `/chat/completions`; editable storyboards and edit plans |
+
+These are presets in the code, **not guaranteed model availability**: check the ZenMux catalog, permissions and balance. You can edit the model list. Storyboard shots span 1–30 seconds and split at configured model limits. Standard video requests validate 1–120 seconds; providers may impose stricter limits. Other models have no universal resolution guarantee. AI output resolution is separate from project/export resolution. Optional last-frame references require a compatible route and do not guarantee continuity.
+
+## Downloads and product focus
+
+- [macOS Apple Silicon DMG](https://github.com/bennix/OpenCutAI/releases/download/v0.1.8/OpenCut-AI-0.1.8-arm64.dmg) — Developer ID signed and Apple notarized.
+- [Windows x64 installer](https://github.com/bennix/OpenCutAI/releases/download/v0.1.8/OpenCut-AI-0.1.8-x64-Setup.exe) — unsigned; SmartScreen may warn. Verify the release source and SHA256 checksum.
+- Linux x64: [DEB](https://github.com/bennix/OpenCutAI/releases/download/v0.1.8/OpenCut-AI-0.1.8-amd64.deb) / [RPM](https://github.com/bennix/OpenCutAI/releases/download/v0.1.8/OpenCut-AI-0.1.8-x86_64.rpm).
+- Landing page: [English](https://bennix.github.io/OpenCutAI/en.html) / [中文](https://bennix.github.io/OpenCutAI/).
+
+OpenCut AI focuses on **screen recording → AI storyboards → timeline editing**, with placeholders, retries and optional frame continuity. It extends OpenCut Classic's editor foundation. CapCut targets broad creator editing/template workflows; Resolve is a stronger fit for professional grading and VFX. This is workflow positioning, not a benchmark or exhaustive feature comparison.
+
 ## Development
 
 ```sh

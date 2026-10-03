@@ -59,13 +59,17 @@ jobs:
           Start-Process -FilePath $installer -ArgumentList '/S', "/D=$destination" -Wait
           $executable = Join-Path $destination 'OpenCut AI.exe'
           if (!(Test-Path $executable)) { throw 'Installer did not create application' }
-          $process = Start-Process -FilePath $executable -PassThru
+          $process = Start-Process -FilePath $executable -ArgumentList '--enable-logging', '--log-file=electron-smoke.log' -WorkingDirectory $destination -PassThru
+          Write-Host "Started process $($process.Id)"
           for ($attempt = 0; $attempt -lt 90; $attempt++) {
             try {
-              $response = Invoke-WebRequest http://127.0.0.1:3002/projects
+              $response = Invoke-WebRequest http://127.0.0.1:3002/projects -TimeoutSec 2
               if ($response.StatusCode -eq 200 -and $response.Content.Contains('<html')) { Stop-Process -Id $process.Id -ErrorAction SilentlyContinue; exit 0 }
             } catch {}
             Start-Sleep 1
           }
-          Get-ChildItem $env:APPDATA -Filter server.log -Recurse -ErrorAction SilentlyContinue | Get-Content
+          Get-Process | Where-Object { $_.ProcessName -like '*OpenCut*' } | Format-Table Id,ProcessName,Path
+          Get-ChildItem $destination -Recurse -Filter '*log*' | ForEach-Object { Write-Host $_.FullName; Get-Content $_.FullName -ErrorAction SilentlyContinue }
+          Get-ChildItem $env:APPDATA -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.Name -eq 'server.log' -or $_.Name -eq '.ready' } | ForEach-Object { Write-Host $_.FullName; Get-Content $_.FullName }
+          Write-Host "Process exited: $($process.HasExited), exit code: $($process.ExitCode)"
           throw 'Packaged editor did not start'
