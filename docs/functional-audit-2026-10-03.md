@@ -91,3 +91,7 @@ Electron 已设置 nodeIntegration=false、contextIsolation=true、sandbox=true�
 ## 同日实施更新
 
 上面的风险描述保留为初始审查记录。六项可靠性改进与独立管理密钥余额监控已在源码实施，详情、验证和剩余限制见 [RELIABILITY.md](RELIABILITY.md)。录屏流式写入、任务恢复与未知提交保护、健康提示、空间面板及备份、系统凭据和主进程请求、可视续接选帧均有具体实现。未宣称提供服务商级幂等、账单硬上限、CFR 转码、全库去重、自动模糊检测或已发布新安装包。
+
+## 0.1.9 安装包发布
+
+上述实施更新已包含在 0.1.9 的 macOS DMG、Windows EXE、Linux DEB/RPM 中。四个安装包已发布，macOS 应用和 DMG 公证与 Gatekeeper 验证通过，Windows/Linux 安装包启动检查通过。具体验证记录见 [RELEASE-0.1.9.md](RELEASE-0.1.9.md)。本地旧 DMG 已清理，保留最新已公证版本。

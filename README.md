@@ -10,11 +10,11 @@ An open-source desktop video editor with AI storyboards, screen recording, edita
 - Local editing needs no subscription. AI generation requires your own provider/API credentials.
 - Screen/system-audio capture support depends on the operating system; Linux Wayland/portal support varies.
 
-## Reliability and balance controls (current source)
+## Reliability and balance controls (0.1.9)
 
-AI Settings includes a separate [ZenMux Management API Key](https://zenmux.ai/platform/management), balance/monthly PAYG queries, low-balance alerts and client submission budgets. Source changes also add persistent recording recovery, a generation task journal, safe storage cleanup and selectable continuity frames. Desktop credentials use OS-protected storage and main-process requests. [Setup and practical limits](docs/RELIABILITY.md). These changes are not included in the existing 0.1.8 installers.
+AI Settings includes a separate [ZenMux Management API Key](https://zenmux.ai/platform/management), balance/monthly PAYG queries, low-balance alerts and client submission budgets. Version 0.1.9 also adds persistent recording recovery, a generation task journal, safe storage cleanup and selectable continuity frames. Desktop credentials use OS-protected storage and main-process requests. [Setup and practical limits](docs/RELIABILITY.md). These features are included in the 0.1.9 installers.
 
-当前源码新增：余额监控与预算设置、录屏持久化恢复、生成任务中心、素材空间与备份、系统保护凭据和续接选帧。[配置与限制说明](docs/RELIABILITY.md)。已有 0.1.8 安装包尚未包含这些改动。
+0.1.9 新增：余额监控与预算设置、录屏持久化恢复、生成任务中心、素材空间与备份、系统保护凭据和续接选帧。[配置与限制说明](docs/RELIABILITY.md)。0.1.9 安装包已包含这些改动。
 
 ## AI integration and limits
 
@@ -31,9 +31,9 @@ These are presets in the code, **not guaranteed model availability**: check the 
 
 ## Downloads and product focus
 
-- [macOS Apple Silicon DMG](https://github.com/bennix/OpenCutAI/releases/download/v0.1.8/OpenCut-AI-0.1.8-arm64.dmg) — Developer ID signed and Apple notarized.
-- [Windows x64 installer](https://github.com/bennix/OpenCutAI/releases/download/v0.1.8/OpenCut-AI-0.1.8-x64-Setup.exe) — unsigned; SmartScreen may warn. Verify the release source and SHA256 checksum.
-- Linux x64: [DEB](https://github.com/bennix/OpenCutAI/releases/download/v0.1.8/OpenCut-AI-0.1.8-amd64.deb) / [RPM](https://github.com/bennix/OpenCutAI/releases/download/v0.1.8/OpenCut-AI-0.1.8-x86_64.rpm).
+- [macOS Apple Silicon DMG](https://github.com/bennix/OpenCutAI/releases/download/v0.1.9/OpenCut-AI-0.1.9-arm64.dmg) — Developer ID signed and Apple notarized.
+- [Windows x64 installer](https://github.com/bennix/OpenCutAI/releases/download/v0.1.9/OpenCut-AI-0.1.9-x64-Setup.exe) — unsigned; SmartScreen may warn. Verify the release source and SHA256 checksum.
+- Linux x64: [DEB](https://github.com/bennix/OpenCutAI/releases/download/v0.1.9/OpenCut-AI-0.1.9-amd64.deb) / [RPM](https://github.com/bennix/OpenCutAI/releases/download/v0.1.9/OpenCut-AI-0.1.9-x86_64.rpm).
 - Landing page: [English](https://bennix.github.io/OpenCutAI/en.html) / [中文](https://bennix.github.io/OpenCutAI/).
 
 OpenCut AI focuses on **screen recording → AI storyboards → timeline editing**, with placeholders, retries and optional frame continuity. It extends OpenCut Classic's editor foundation. CapCut targets broad creator editing/template workflows; Resolve is a stronger fit for professional grading and VFX. This is workflow positioning, not a benchmark or exhaustive feature comparison.

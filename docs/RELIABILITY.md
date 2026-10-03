@@ -1,7 +1,7 @@
 # Reliability and ZenMux account controls / 可靠性与余额控制
 
-Implemented in source after 0.1.8. Existing 0.1.8 installers do not contain these changes.
-本次改动在源码中；已有 0.1.8 安装包尚未包含。
+Included in the 0.1.9 desktop installers.
+已包含在 0.1.9 桌面安装包中。
 
 ## Settings / 设置
 
