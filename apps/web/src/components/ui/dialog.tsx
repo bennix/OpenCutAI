@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/i18n";
+
 
 import * as React from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
@@ -66,7 +68,7 @@ const DialogContent = React.forwardRef<
 			{children}
 			<DialogPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-6 right-6 cursor-pointer opacity-70 hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none">
 				<X className="size-5 text-muted-foreground" />
-				<span className="sr-only">Close</span>
+				<span className="sr-only"><UiText text="Close" /></span>
 			</DialogPrimitive.Close>
 		</DialogPrimitive.Content>
 	</DialogPortal>

@@ -1,0 +1,7 @@
+{
+  "name": "opencut-desktop",
+  "version": "0.1.8",
+  "private": true,
+  "main": "main.cjs",
+  "description": "Local OpenCut editor with ZenMux AI"
+}

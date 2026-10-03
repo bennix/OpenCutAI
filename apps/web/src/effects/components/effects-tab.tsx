@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/i18n";
+
 
 import { useState } from "react";
 import type { ParamValues } from "@/params";
@@ -56,7 +58,7 @@ export function StandaloneEffectTab({
 	return (
 		<div className="flex flex-col h-full">
 			<div className="border-b px-3.5 h-11 shrink-0 flex items-center">
-				<SectionTitle>Effect</SectionTitle>
+				<SectionTitle><UiText text="Effect" /></SectionTitle>
 			</div>
 			<EffectSection
 				effect={effect}
@@ -143,7 +145,7 @@ export function ClipEffectsTab({
 	return (
 		<div className="flex flex-col h-full">
 			<div className="border-b px-3.5 h-11 shrink-0 flex items-center">
-				<SectionTitle>Effects</SectionTitle>
+				<SectionTitle><UiText text="Effects" /></SectionTitle>
 			</div>
 			{effects.length === 0 ? (
 				<EmptyView />
@@ -214,18 +216,16 @@ function EmptyView() {
 				strokeWidth={1}
 			/>
 			<div className="flex flex-col gap-2">
-				<h3 className="font-medium text-foreground">No effects</h3>
+				<h3 className="font-medium text-foreground"><UiText text="No effects" /></h3>
 				<p className="text-muted-foreground text-sm text-balance max-w-44">
-					Add effects to this layer from the Assets panel.
-				</p>
+					<UiText text="Add effects to this layer from the Assets panel." /></p>
 			</div>
 			<Button
 				variant="default"
 				size="sm"
 				onClick={() => setActiveTab("effects")}
 			>
-				Open effects
-			</Button>
+				<UiText text="Open effects" /></Button>
 		</div>
 	);
 }
@@ -282,7 +282,7 @@ function EffectSection({
 				<SectionTitle
 					className={cn(onToggle && !effect.enabled && "text-muted-foreground")}
 				>
-					{definition.name}
+					<UiText text={definition.name} />
 				</SectionTitle>
 			</SectionHeader>
 			<SectionContent

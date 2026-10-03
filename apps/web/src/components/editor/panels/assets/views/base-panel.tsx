@@ -1,3 +1,4 @@
+import { UiText } from "@/i18n";
 import { cn } from "@/utils/ui";
 
 interface PanelViewProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -34,7 +35,7 @@ export function PanelView({
 			{!hideHeader && (
 				<div className="bg-background h-11 shrink-0 pl-3 pr-2 flex items-center justify-between border-b">
 					{title && (
-						<span className="text-muted-foreground text-sm">{title}</span>
+						<span className="text-muted-foreground text-sm"><UiText text={title} /></span>
 					)}
 					{actions}
 				</div>

@@ -1,4 +1,6 @@
 "use client";
+import { useTranslation } from "@/i18n";
+
 
 import { useEffect, useRef, useCallback } from "react";
 import { PanelView } from "@/components/editor/panels/assets/views/base-panel";
@@ -7,14 +9,23 @@ import { effectsRegistry, EFFECT_TARGET_ELEMENT_TYPES } from "@/effects";
 import { effectPreviewService } from "@/services/renderer/effect-preview";
 import { useEditor } from "@/editor/use-editor";
 import { buildEffectElement } from "@/timeline/element-utils";
+import { StandaloneEffectTab } from "./effects-tab";
 import type { EffectDefinition } from "@/effects/types";
 
 export function EffectsView() {
+	const t = useTranslation();
 	const effects = effectsRegistry.getAll();
+ const editor = useEditor();
+ const selection = useEditor(e => e.selection.getSelectedElements());
+ useEditor(e => e.scenes.getActiveScene().tracks);
+ const selected = editor.timeline.getElementsWithTracks({elements:selection});
+ const effect = selected.length === 1 && selected[0].element.type === "effect" ? selected[0] : undefined;
 
 	return (
-		<PanelView title="Effects">
-			<EffectsGrid effects={effects} />
+		<PanelView title={t("Effects")}>
+			<p className="text-sm text-muted-foreground mb-3">点击 + 添加特效，选中特效轨道片段可自定义参数。特效作用于下方画面，可调整时长、删除或撤销。</p>
+            {effect && effect.element.type === "effect" && <div className="mb-4 border rounded"><StandaloneEffectTab element={effect.element} trackId={effect.track.id} /></div>}
+            <EffectsGrid effects={effects} />
 		</PanelView>
 	);
 }
@@ -54,6 +65,7 @@ function EffectPreviewCanvas({ effectType }: { effectType: string }) {
 }
 
 function EffectItem({ effect }: { effect: EffectDefinition }) {
+	const t = useTranslation();
 	const editor = useEditor();
 
 	const handleAddToTimeline = useCallback(() => {
@@ -73,7 +85,7 @@ function EffectItem({ effect }: { effect: EffectDefinition }) {
 
 	return (
 		<DraggableItem
-			name={effect.name}
+			name={t(effect.name)}
 			preview={preview}
 			dragData={{
 				id: effect.type,

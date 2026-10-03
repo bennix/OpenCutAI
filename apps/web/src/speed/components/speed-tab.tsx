@@ -1,3 +1,5 @@
+
+import { UiText } from "@/i18n";
 import { useRef } from "react";
 import { useEditor } from "@/editor/use-editor";
 import { NumberField } from "@/components/ui/number-field";
@@ -111,7 +113,7 @@ export function SpeedTab({
 	return (
 		<Section collapsible sectionKey={`${element.id}:speed`}>
 			<SectionHeader>
-				<SectionTitle>Speed</SectionTitle>
+				<SectionTitle><UiText text="Speed" /></SectionTitle>
 			</SectionHeader>
 			<SectionContent>
 				<SectionFields>
@@ -140,7 +142,7 @@ export function SpeedTab({
 						/>
 					</SectionField>
 					<div className="flex items-center justify-between">
-						<span className="text-sm">Change pitch</span>
+						<span className="text-sm"><UiText text="Change pitch" /></span>
 						<Switch
 							checked={!maintainPitch}
 							disabled={!isPitchPreserveAvailable}

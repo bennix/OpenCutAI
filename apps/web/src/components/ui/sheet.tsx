@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/i18n";
+
 
 import * as React from "react";
 import { Dialog as SheetPrimitive } from "radix-ui";
@@ -86,7 +88,7 @@ const SheetContent = React.forwardRef<
 		>
 			<SheetPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute top-4 right-4 cursor-pointer rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none">
 				<X className="size-5" />
-				<span className="sr-only">Close</span>
+				<span className="sr-only"><UiText text="Close" /></span>
 			</SheetPrimitive.Close>
 			{children}
 		</SheetPrimitive.Content>

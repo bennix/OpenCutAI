@@ -1,3 +1,4 @@
+import { loadFonts } from "@/fonts/google-fonts";
 import type { EditorCore } from "@/core";
 import type { RootNode } from "@/services/renderer/nodes/root-node";
 import type { ExportOptions, ExportResult } from "@/export";
@@ -150,7 +151,12 @@ export class RendererManager {
 		const { format, quality, fps, includeAudio } = options;
 
 		try {
+			// Flush live property edits before taking the immutable export snapshot.
+			this.editor.timeline.commitPreview();
 			const tracks = this.editor.scenes.getActiveScene().tracks;
+			await loadFonts({ families: [...new Set(tracks.overlay.flatMap(track =>
+				track.elements.flatMap(element => element.type === "text" && typeof element.params.fontFamily === "string" ? [element.params.fontFamily] : [])
+			))] });
 			const mediaAssets = this.editor.media.getAssets();
 			const activeProject = this.editor.project.getActive();
 

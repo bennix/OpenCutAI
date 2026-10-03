@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/i18n";
+
 
 import { useRef, useState, type PointerEvent } from "react";
 import { useShiftKey } from "@/hooks/use-shift-key";
@@ -164,7 +166,7 @@ export function BezierGraph({
 			onPointerUp={onPointerUp}
 			onPointerCancel={onPointerCancel}
 		>
-			<title>Bezier curve editor</title>
+			<title><UiText text={"Bezier curve editor"} /></title>
 			<line
 				x1={p0.x}
 				y1={p0.y}

@@ -243,6 +243,7 @@ export class PreviewInteractionController {
 		this.onPointerMove = this.onPointerMove.bind(this);
 		this.onPointerUp = this.onPointerUp.bind(this);
 		this.commitTextEdit = this.commitTextEdit.bind(this);
+		this.cancelTextEdit = this.cancelTextEdit.bind(this);
 		this.handlePlaybackChange = this.handlePlaybackChange.bind(this);
 
 		this.unsubscribePlayback = this.deps.playback.subscribe(
@@ -301,6 +302,13 @@ export class PreviewInteractionController {
 		this.notify();
 	}
 
+	cancelTextEdit(): void {
+		if (!this.editingTextState) return;
+		this.editingTextState = null;
+		this.deps.timeline.discardPreview();
+		this.notify();
+	}
+
 	onDoubleClick({ clientX, clientY }: ReactMouseEvent): void {
 		if (this.editingTextState || this.deps.preview.isMaskMode()) return;
 
@@ -317,6 +325,8 @@ export class PreviewInteractionController {
 		});
 
 		if (!hit || hit.element.type !== "text") return;
+
+		this.deps.selection.setSelected([{ trackId: hit.trackId, elementId: hit.elementId }]);
 
 		this.editingTextState = {
 			trackId: hit.trackId,

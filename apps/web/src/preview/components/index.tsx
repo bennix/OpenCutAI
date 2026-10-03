@@ -101,6 +101,12 @@ function RenderTreeController() {
 	const activeProject = useEditor((e) => e.project.getActive());
 
 	const { width, height } = usePreviewSize();
+	const [fontRevision, setFontRevision] = useState(0);
+	useEffect(() => {
+		const refresh = () => setFontRevision(revision => revision + 1);
+		document.fonts.addEventListener("loadingdone", refresh);
+		return () => document.fonts.removeEventListener("loadingdone", refresh);
+	}, []);
 
 	useDeepCompareEffect(() => {
 		if (!activeProject) return;
@@ -116,7 +122,7 @@ function RenderTreeController() {
 		});
 
 		editor.renderer.setRenderTree({ renderTree });
-	}, [tracks, mediaAssets, activeProject?.settings.background, width, height]);
+	}, [tracks, mediaAssets, activeProject?.settings.background, width, height, fontRevision]);
 
 	return null;
 }
@@ -206,7 +212,13 @@ function PreviewCanvas({
 		lastFrameRef.current = frame;
 		renderer
 			.render({ node: renderTree, time: renderTime })
-			.then(() => {
+			.catch((error) => {
+				// A failed frame must not permanently freeze property edits/playback.
+				lastSceneRef.current = null;
+				lastFrameRef.current = -1;
+				console.error("Preview render failed", error);
+			})
+			.finally(() => {
 				renderingRef.current = false;
 			});
 	}, [renderer, renderTree, editor.playback, editor.timeline]);

@@ -1,20 +1,10 @@
-import type {
-	ParamDefinition,
-	ParamValue,
-	ParamValues,
-} from "@/params";
+import type { ParamDefinition, ParamValue, ParamValues } from "@/params";
 import { MIN_TRANSFORM_SCALE } from "@/animation/transform";
 import type { BlendMode } from "@/rendering";
-import type {
-	ElementType,
-	TimelineElement,
-} from "@/timeline";
+import type { ElementType, TimelineElement } from "@/timeline";
 import { DEFAULTS } from "@/timeline/defaults";
 import { VOLUME_DB_MAX, VOLUME_DB_MIN } from "@/timeline/audio-constants";
-import {
-	CORNER_RADIUS_MAX,
-	CORNER_RADIUS_MIN,
-} from "@/text/background";
+import { CORNER_RADIUS_MAX, CORNER_RADIUS_MIN } from "@/text/background";
 
 export type ElementParamDefinition<TKey extends string = string> =
 	ParamDefinition<TKey> & {
@@ -46,13 +36,7 @@ export class DefinitionRegistry<TKey extends string, TDefinition> {
 		this.entityName = entityName;
 	}
 
-	register({
-		key,
-		definition,
-	}: {
-		key: TKey;
-		definition: TDefinition;
-	}): void {
+	register({ key, definition }: { key: TKey; definition: TDefinition }): void {
 		this.definitions.set(key, definition);
 	}
 
@@ -157,12 +141,32 @@ const visualElementParams: ElementParamDefinition[] = [
 const audioElementParams: ElementParamDefinition[] = [
 	{
 		key: "volume",
-		label: "Volume",
+		label: "Volume (dB)",
 		type: "number",
 		default: DEFAULTS.element.volume,
 		min: VOLUME_DB_MIN,
 		max: VOLUME_DB_MAX,
 		step: 0.01,
+	},
+	{
+		key: "fadeIn",
+		label: "Audio fade in (seconds)",
+		type: "number",
+		default: 0,
+		min: 0,
+		max: 30,
+		step: 0.1,
+		keyframable: false,
+	},
+	{
+		key: "fadeOut",
+		label: "Audio fade out (seconds)",
+		type: "number",
+		default: 0,
+		min: 0,
+		max: 30,
+		step: 0.1,
+		keyframable: false,
 	},
 	{
 		key: "muted",
@@ -201,6 +205,53 @@ const textElementParams: ElementParamDefinition[] = [
 		label: "Color",
 		type: "color",
 		default: "#ffffff",
+	},
+	{
+		key: "shadow.enabled",
+		label: "Text Shadow",
+		type: "boolean",
+		default: true,
+		keyframable: false,
+	},
+	{
+		key: "shadow.color",
+		label: "Shadow Color",
+		type: "color",
+		default: "#000000",
+		keyframable: false,
+		dependencies: [{ param: "shadow.enabled", equals: true }],
+	},
+	{
+		key: "shadow.offsetX",
+		label: "Shadow Offset X",
+		type: "number",
+		default: 2,
+		keyframable: false,
+		dependencies: [{ param: "shadow.enabled", equals: true }],
+		min: -500,
+		max: 500,
+		step: 1,
+	},
+	{
+		key: "shadow.offsetY",
+		label: "Shadow Offset Y",
+		type: "number",
+		default: 2,
+		keyframable: false,
+		dependencies: [{ param: "shadow.enabled", equals: true }],
+		min: -500,
+		max: 500,
+		step: 1,
+	},
+	{
+		key: "shadow.blur",
+		label: "Shadow Blur",
+		type: "number",
+		default: 3,
+		keyframable: false,
+		dependencies: [{ param: "shadow.enabled", equals: true }],
+		min: 0,
+		step: 1,
 	},
 	{
 		key: "textAlign",
@@ -335,7 +386,10 @@ elementParamRegistry.register({
 	key: "video",
 	definition: [...visualElementParams, ...audioElementParams],
 });
-elementParamRegistry.register({ key: "image", definition: visualElementParams });
+elementParamRegistry.register({
+	key: "image",
+	definition: visualElementParams,
+});
 elementParamRegistry.register({
 	key: "text",
 	definition: [...textElementParams, ...visualElementParams],
@@ -435,4 +489,3 @@ export function buildElementParamValues({
 	}
 	return values;
 }
-

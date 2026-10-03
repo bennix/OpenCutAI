@@ -1,3 +1,4 @@
+import { readTextShadow } from "@/text/shadow";
 import { BaseNode } from "./base-node";
 import type { TextElement } from "@/timeline";
 import type { EffectPass } from "@/effects/types";
@@ -55,6 +56,7 @@ export function renderTextToContext({
 		background: resolved.measuredText.resolvedBackground,
 		backgroundColor: resolved.backgroundColor,
 		textBaseline: baseline,
+		shadow: readTextShadow(node.params.params),
 	});
 
 	ctx.restore();

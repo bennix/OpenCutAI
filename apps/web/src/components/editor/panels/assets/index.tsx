@@ -1,5 +1,7 @@
 "use client";
 
+
+
 import { Separator } from "@/components/ui/separator";
 import { type Tab, useAssetsPanelStore } from "@/components/editor/panels/assets/assets-panel-store";
 import { TabBar } from "./tabbar";
@@ -11,26 +13,27 @@ import { StickersView } from "@/stickers/components/assets-view";
 import { TextView } from "@/text/components/assets-view";
 import { EffectsView } from "@/effects/components/assets-view";
 
+import { TransitionsView } from "@/transitions/assets-view";
+import { AdjustmentView } from "@/adjustment/assets-view";
+import { DirectorView } from "@/ai/director-view";
+import { AiAssetsView } from "@/ai/assets-view";
+import { useMcpBridge } from "@/ai/mcp-bridge";
+
 export function AssetsPanel() {
+	useMcpBridge();
 	const { activeTab } = useAssetsPanelStore();
 
 	const viewMap: Record<Tab, React.ReactNode> = {
 		media: <MediaView />,
+	ai: <AiAssetsView />,
+		director: <DirectorView />,
 		sounds: <SoundsView />,
 		text: <TextView />,
 		stickers: <StickersView />,
 		effects: <EffectsView />,
-		transitions: (
-			<div className="text-muted-foreground p-4">
-				Transitions view coming soon...
-			</div>
-		),
+		transitions: <TransitionsView />,
 		captions: <Captions />,
-		adjustment: (
-			<div className="text-muted-foreground p-4">
-				Adjustment view coming soon...
-			</div>
-		),
+		adjustment: <AdjustmentView />,
 		settings: <SettingsView />,
 	};
 

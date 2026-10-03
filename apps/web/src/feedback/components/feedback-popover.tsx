@@ -1,4 +1,6 @@
 "use client";
+import { UiText, useTranslation } from "@/i18n";
+
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -97,8 +99,7 @@ export function FeedbackPopover() {
 		<Popover open={open} onOpenChange={setOpen}>
 			<PopoverTrigger asChild>
 				<Button variant="outline" className="h-8">
-					Send feedback
-				</Button>
+					<UiText text="Send feedback" /></Button>
 			</PopoverTrigger>
 			<PopoverContent align="end" className="w-80 p-0">
 				<FeedbackPopoverContent onClose={() => setOpen(false)} />
@@ -110,6 +111,7 @@ export function FeedbackPopover() {
 type View = "compose" | "history";
 
 function FeedbackPopoverContent({ onClose }: { onClose: () => void }) {
+	const t = useTranslation();
 	const { entries, isSubmitting, submit } = useFeedback();
 	const [view, setView] = useState<View>("compose");
 
@@ -148,8 +150,7 @@ function FeedbackPopoverContent({ onClose }: { onClose: () => void }) {
 						onClick={() => setView("compose")}
 						className="text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors"
 					>
-						← Back
-					</button>
+						<UiText text="← Back" /></button>
 				</div>
 			</div>
 		);
@@ -166,7 +167,7 @@ function FeedbackPopoverContent({ onClose }: { onClose: () => void }) {
 							<FormItem>
 								<FormControl>
 									<Textarea
-										placeholder="Thoughts, bugs, ideas..."
+										placeholder={t("Thoughts, bugs, ideas...")}
 										className="min-h-[7rem] text-sm p-3 bg-background shadow-none border-none! resize-none"
 										{...field}
 									/>
@@ -195,8 +196,7 @@ function FeedbackPopoverContent({ onClose }: { onClose: () => void }) {
 									size="sm"
 									onClick={onClose}
 								>
-									Cancel
-								</Button>
+									<UiText text="Cancel" /></Button>
 							)}
 							<Button
 								type="submit"

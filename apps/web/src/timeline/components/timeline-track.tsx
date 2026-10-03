@@ -1,5 +1,7 @@
 "use client";
 
+import { useEditor } from "@/editor/use-editor";
+import { useTranslation } from "@/i18n";
 import { useElementSelection } from "@/timeline/hooks/element/use-element-selection";
 import { TimelineElement } from "./timeline-element";
 import type { TimelineTrack } from "@/timeline";
@@ -45,14 +47,16 @@ export function TimelineTrackContent({
 	shouldIgnoreClick,
 	targetElementId = null,
 }: TimelineTrackContentProps) {
+	const t = useTranslation();
+	const editor = useEditor();
 	const { isElementSelected } = useElementSelection();
 
 	return (
-		<div className="relative size-full">
+		<div className="group/track relative size-full">
 			<button
 				type="button"
 				className="absolute inset-0 m-0 size-full appearance-none border-0 bg-transparent p-0"
-				aria-label={`Select ${track.name} track`}
+				aria-label={t(`Select ${track.name === "Main Track" ? t("Main Track") : track.name} track`)}
 				onMouseUp={(event) => {
 					if (shouldIgnoreClick?.()) return;
 					onTrackMouseUp?.(event);
@@ -109,6 +113,11 @@ export function TimelineTrackContent({
 					})
 				)}
 			</div>
+			<button type="button" title={t("Delete track")} aria-label={`${t("Delete track")}: ${track.name}`}
+				className="absolute right-1 top-1 z-50 rounded bg-background px-2 py-1 text-xs opacity-0 group-hover/track:opacity-100 focus:opacity-100"
+				onMouseDown={(event) => event.stopPropagation()}
+				onClick={(event) => { event.stopPropagation(); editor.timeline.removeTrack({ trackId: track.id }); }}
+			>{t("Delete track")}</button>
 		</div>
 	);
 }

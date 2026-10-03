@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/i18n";
 
 import { Eye, EyeOff, X } from "lucide-react";
 import { cva, type VariantProps } from "class-variance-authority";
@@ -60,6 +61,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 		},
 		ref,
 	) => {
+		const t = useTranslation();
 		const [isFocused, setIsFocused] = useState(false);
 
 		const isPassword = type === "password";
@@ -101,6 +103,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 						onBlur?.(e);
 					}}
 					{...props}
+					placeholder={props.placeholder ? t(props.placeholder) : undefined}
+					aria-label={props["aria-label"] ? t(props["aria-label"]) : undefined}
 				/>
 				{showClear && (
 					<Button
@@ -125,7 +129,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 							"text-muted-foreground hover:text-foreground absolute top-0 h-full px-3",
 							showClear ? "right-10" : "right-0",
 						)}
-						aria-label={showPassword ? "Hide password" : "Show password"}
+						aria-label={showPassword ? t("Hide password") : t("Show password")}
 					>
 						{showPassword ? (
 							<Eye className="size-4" />

@@ -1,5 +1,5 @@
-export function formatDate({ date }: { date: Date }): string {
-	return date.toLocaleDateString("en-US", {
+export function formatDate({ date, locale = "en" }: { date: Date; locale?: "zh" | "en" }): string {
+	return date.toLocaleDateString(locale === "zh" ? "zh-CN" : "en-US", {
 		month: "short",
 		day: "numeric",
 		year: "numeric",

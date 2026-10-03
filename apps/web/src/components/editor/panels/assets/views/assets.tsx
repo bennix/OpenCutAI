@@ -1,6 +1,13 @@
 "use client";
+import { UiText, useTranslation, localize } from "@/i18n";
 
 import Image from "next/image";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
 import { useMemo, useState } from "react";
 import { PanelView } from "@/components/editor/panels/assets/views/base-panel";
 import { MediaDragOverlay } from "@/components/editor/panels/assets/drag-overlay";
@@ -60,6 +67,7 @@ import {
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 
 export function MediaView() {
+	const t = useTranslation();
 	const editor = useEditor();
 	const mediaFiles = useEditor((e) => e.media.getAssets());
 	const activeProject = useEditor((e) => e.project.getActive());
@@ -80,7 +88,7 @@ export function MediaView() {
 	const processFiles = async ({ files }: { files: File[] }) => {
 		if (!files || files.length === 0) return;
 		if (!activeProject) {
-			toast.error("No active project");
+			toast.error(localize("No active project"));
 			return;
 		}
 
@@ -192,17 +200,19 @@ export function MediaView() {
 			<input {...fileInputProps} />
 
 			<PanelView
-				title="Assets"
+				title={t("Assets")}
 				actions={
-					<MediaActions
-						mediaViewMode={mediaViewMode}
-						setMediaViewMode={setMediaViewMode}
-						isProcessing={isProcessing}
-						sortBy={mediaSortBy}
-						sortOrder={mediaSortOrder}
-						onSort={handleSort}
-						onImport={openFilePicker}
-					/>
+					<>
+						<MediaActions
+							mediaViewMode={mediaViewMode}
+							setMediaViewMode={setMediaViewMode}
+							isProcessing={isProcessing}
+							sortBy={mediaSortBy}
+							sortOrder={mediaSortOrder}
+							onSort={handleSort}
+							onImport={openFilePicker}
+						/>
+					</>
 				}
 				className={cn(isDragOver && "bg-accent/30")}
 				contentClassName="h-full"
@@ -324,7 +334,9 @@ function MediaItemWithContextMenu({
 		<ContextMenu>
 			<ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
 			<ContextMenuContent>
-				<ContextMenuItem>Export clips</ContextMenuItem>
+				<ContextMenuItem>
+					<UiText text="Export clips" />
+				</ContextMenuItem>
 				<ContextMenuItem
 					variant="destructive"
 					onClick={(event: React.MouseEvent<HTMLDivElement>) =>
@@ -354,32 +366,84 @@ function MediaItemList({
 	}) => void;
 }) {
 	const isGrid = mode === "grid";
+	const [previewAsset, setPreviewAsset] = useState<MediaAsset | null>(null);
+	const t = useTranslation();
 
 	return (
-		<div
-			className={cn(isGrid ? "grid gap-4" : "flex flex-col gap-1.5")}
-			style={
-				isGrid ? { gridTemplateColumns: "repeat(auto-fill, 7rem)" } : undefined
-			}
-		>
-			{items.map((item) => (
-				<MediaItemWithContextMenu item={item} onRemove={onRemove} key={item.id}>
-					<SelectableItem className={cn(!isGrid && "w-full")} id={item.id}>
-						<MediaAssetDraggable
-							item={item}
-							preview={
-								<MediaPreview
-									item={item}
-									variant={isGrid ? "grid" : "compact"}
-								/>
-							}
-							variant={isGrid ? "card" : "compact"}
-							isRounded={isGrid ? false : undefined}
+		<>
+			<Dialog
+				open={!!previewAsset}
+				onOpenChange={(open) => {
+					if (!open) setPreviewAsset(null);
+				}}
+			>
+				<DialogContent className="max-w-4xl" aria-describedby={undefined}>
+					<DialogHeader>
+						<DialogTitle>{previewAsset?.name}</DialogTitle>
+					</DialogHeader>
+					{previewAsset && (
+						// Source assets may not include a separate caption track.
+						// eslint-disable-next-line jsx-a11y/media-has-caption
+						<video
+							key={previewAsset.id}
+							src={previewAsset.url}
+							controls
+							autoPlay
+							playsInline
+							preload="metadata"
+							className="w-full max-h-[70vh]"
 						/>
-					</SelectableItem>
-				</MediaItemWithContextMenu>
-			))}
-		</div>
+					)}
+				</DialogContent>
+			</Dialog>
+			<div
+				className={cn(isGrid ? "grid gap-4" : "flex flex-col gap-1.5")}
+				style={
+					isGrid
+						? { gridTemplateColumns: "repeat(auto-fill, 7rem)" }
+						: undefined
+				}
+			>
+				{items.map((item) => (
+					<MediaItemWithContextMenu
+						item={item}
+						onRemove={onRemove}
+						key={item.id}
+					>
+						<SelectableItem className={cn(!isGrid && "w-full")} id={item.id}>
+							<MediaAssetDraggable
+								item={item}
+								preview={
+									<MediaPreview
+										item={item}
+										variant={isGrid ? "grid" : "compact"}
+									/>
+								}
+								variant={isGrid ? "card" : "compact"}
+								isRounded={isGrid ? false : undefined}
+							/>
+							{item.type === "video" ? (
+								<Button
+									variant="outline"
+									size="sm"
+									className="w-full"
+									onClick={(event) => {
+										event.stopPropagation();
+										setPreviewAsset(item);
+									}}
+								>
+									{t("Play video")}
+								</Button>
+							) : (
+								<span className="text-xs text-muted-foreground">
+									{t(item.type === "image" ? "Image" : "Audio")}
+								</span>
+							)}
+						</SelectableItem>
+					</MediaItemWithContextMenu>
+				))}
+			</div>
+		</>
 	);
 }
 
@@ -428,7 +492,9 @@ function MediaTypePlaceholder({
 			)}
 		>
 			<HugeiconsIcon icon={icon} className={iconClassName} />
-			<span className="text-xs">{label}</span>
+			<span className="text-xs">
+				<UiText text={label} />
+			</span>
 			<MediaDurationLabel duration={duration} />
 		</div>
 	);
@@ -598,8 +664,8 @@ function MediaActions({
 					</DropdownMenu>
 					<TooltipContent>
 						<p>
-							Sort by {sortBy} (
-							{sortOrder === "asc" ? "ascending" : "descending"})
+							<UiText text="Sort by" />
+							{sortBy} ({sortOrder === "asc" ? "ascending" : "descending"})
 						</p>
 					</TooltipContent>
 				</Tooltip>
@@ -607,12 +673,13 @@ function MediaActions({
 			<Button
 				variant="outline"
 				onClick={onImport}
+				title={localize("Import images, video or audio")}
 				disabled={isProcessing}
 				size="sm"
 				className="items-center justify-center gap-1.5"
 			>
 				<HugeiconsIcon icon={CloudUploadIcon} />
-				Import
+				<UiText text="Import" />
 			</Button>
 		</div>
 	);
@@ -636,7 +703,7 @@ function SortMenuItem({
 
 	return (
 		<DropdownMenuItem onClick={() => onSort({ key: sortKey })}>
-			{label} {arrow}
+			<UiText text={label} /> {arrow}
 		</DropdownMenuItem>
 	);
 }

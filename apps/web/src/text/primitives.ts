@@ -1,3 +1,4 @@
+import { applyTextShadow, type TextShadow } from "./shadow";
 import type { TextCanvasContext, TextBlockMeasurement } from "@/text/layout";
 import { DEFAULTS } from "@/timeline/defaults";
 import { clamp } from "@/utils/math";
@@ -145,6 +146,7 @@ export function drawMeasuredTextLayout({
 	background,
 	backgroundColor,
 	textBaseline = "middle",
+	shadow,
 }: {
 	ctx: TextCanvasContext;
 	layout: MeasuredTextLayout;
@@ -152,6 +154,7 @@ export function drawMeasuredTextLayout({
 	background?: ResolvedTextBackgroundLike | null;
 	backgroundColor?: string;
 	textBaseline?: CanvasTextBaseline;
+	shadow?: TextShadow;
 }): void {
 	ctx.font = layout.fontString;
 	ctx.textAlign = layout.textAlign;
@@ -197,6 +200,8 @@ export function drawMeasuredTextLayout({
 		}
 	}
 
+	ctx.save();
+	if (shadow) applyTextShadow(ctx, shadow, layout.fontSizeRatio);
 	for (let index = 0; index < layout.lines.length; index++) {
 		const lineY = index * layout.lineHeightPx - layout.block.visualCenterOffset;
 		ctx.fillText(layout.lines[index], 0, lineY);
@@ -210,6 +215,7 @@ export function drawMeasuredTextLayout({
 			textAlign: layout.textAlign,
 		});
 	}
+	ctx.restore();
 }
 
 export function strokeMeasuredTextLayout({

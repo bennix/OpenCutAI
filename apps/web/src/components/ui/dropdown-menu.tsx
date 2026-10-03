@@ -1,4 +1,5 @@
 "use client";
+import { UiLabels } from "@/i18n";
 
 import * as React from "react";
 import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui";
@@ -68,7 +69,7 @@ const DropdownMenuSubTrigger = React.forwardRef<
 		)}
 		{...props}
 	>
-		{children}
+		{props.asChild ? children : <UiLabels>{children}</UiLabels>}
 		<ChevronRight className="ml-auto" />
 	</DropdownMenuPrimitive.SubTrigger>
 ));
@@ -151,7 +152,7 @@ const DropdownMenuItem = React.forwardRef<
 			) : (
 				<>
 					{iconSlot}
-					{children}
+					<UiLabels>{children}</UiLabels>
 				</>
 			);
 
@@ -193,7 +194,7 @@ const DropdownMenuCheckboxItem = React.forwardRef<
 		}}
 		{...props}
 	>
-		{children}
+		{props.asChild ? children : <UiLabels>{children}</UiLabels>}
 		<span className="absolute right-2 flex size-3.5 items-center justify-center">
 			<DropdownMenuPrimitive.ItemIndicator>
 				<Check className="size-4" />
@@ -225,7 +226,7 @@ const DropdownMenuRadioItem = React.forwardRef<
 				<Circle className="size-2 fill-current" />
 			</DropdownMenuPrimitive.ItemIndicator>
 		</span>
-		{children}
+		{props.asChild ? children : <UiLabels>{children}</UiLabels>}
 	</DropdownMenuPrimitive.RadioItem>
 ));
 DropdownMenuRadioItem.displayName = DropdownMenuPrimitive.RadioItem.displayName;

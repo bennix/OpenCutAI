@@ -1,3 +1,4 @@
+import { LocaleDocument } from "@/i18n";
 import { ThemeProvider } from "next-themes";
 import Script from "next/script";
 import "./globals.css";
@@ -7,9 +8,9 @@ import { TooltipProvider } from "../components/ui/tooltip";
 import { baseMetaData } from "./metadata";
 import { BotIdClient } from "botid/client";
 import { webEnv } from "@/env/web";
-import { Inter } from "next/font/google";
+import localFont from "next/font/local";
 
-const siteFont = Inter({ subsets: ["latin"] });
+const siteFont = localFont({ src: "./fonts/inter-latin-variable.woff2", variable: "--font-inter", display: "swap" });
 
 export const metadata = baseMetaData;
 
@@ -39,12 +40,13 @@ export default function RootLayout({
 					</>
 				)}
 			</head>
-			<body className={`${siteFont.className} font-sans antialiased`}>
+			<body className={`${siteFont.className} ${siteFont.variable} font-sans antialiased`}>
 				<ThemeProvider
 					attribute="class"
 					defaultTheme="system"
 					disableTransitionOnChange={true}
 				>
+					<LocaleDocument />
 					<TooltipProvider>
 						<Toaster />
 						<Script

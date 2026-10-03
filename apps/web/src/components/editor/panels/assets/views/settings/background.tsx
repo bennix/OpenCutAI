@@ -1,4 +1,6 @@
 "use client";
+import { UiText, useTranslation } from "@/i18n";
+
 
 import { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import {
@@ -75,7 +77,7 @@ const BlurPreview = memo(
 				/>
 				<div className="absolute right-1 bottom-1 left-1 text-center">
 					<span className="rounded bg-black/50 px-1 text-xs text-white">
-						{blur.label}
+						<UiText text={blur.label} />
 					</span>
 				</div>
 			</button>
@@ -149,6 +151,7 @@ function CustomColorPreview({
 	onPreview: (color: string) => void;
 	onCommit: (color: string) => void;
 }) {
+	const t = useTranslation();
 	return (
 		<Popover>
 			<PopoverTrigger asChild>
@@ -158,7 +161,7 @@ function CustomColorPreview({
 						isSelected && "border-primary border-2",
 					)}
 					type="button"
-					aria-label="Pick a custom background color"
+					aria-label={t("Pick a custom background color")}
 				>
 					<span
 						className="absolute inset-0"
@@ -263,7 +266,7 @@ export function BackgroundContent() {
 				showTopBorder={false}
 			>
 				<SectionHeader>
-					<SectionTitle>Blur</SectionTitle>
+					<SectionTitle><UiText text="Blur" /></SectionTitle>
 				</SectionHeader>
 				<SectionContent>
 					<div className="flex flex-wrap gap-2">{blurPreviews}</div>

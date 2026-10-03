@@ -1,4 +1,6 @@
 "use client";
+import { UiText, useTranslation } from "@/i18n";
+
 
 import Image from "next/image";
 import type { CSSProperties } from "react";
@@ -32,6 +34,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 
 export function StickersView() {
+	const t = useTranslation();
 	const {
 		browseContent,
 		browseStickers,
@@ -55,7 +58,7 @@ export function StickersView() {
 				<Input
 					size="sm"
 					variant="default"
-					placeholder="Search..."
+					placeholder={t("Search...")}
 					value={searchQuery}
 					onChange={(e) => {
 						setSearchQuery({ query: e.target.value });
@@ -79,7 +82,7 @@ export function StickersView() {
 				variant="underline"
 				className="mt-2 flex min-h-0 flex-1 flex-col"
 			>
-				<TabsList aria-label="Sticker categories">
+				<TabsList aria-label={t("Sticker categories")}>
 					{Object.entries(STICKER_CATEGORIES).map(([key, label]) => (
 						<TabsTrigger key={key} value={key}>
 							{label}
@@ -141,7 +144,7 @@ function EmptyView({ message }: { message: string }) {
 				className="text-muted-foreground size-10"
 			/>
 			<div className="flex flex-col gap-2 text-center">
-				<p className="text-lg font-medium">No stickers found</p>
+				<p className="text-lg font-medium"><UiText text="No stickers found" /></p>
 				<p className="text-muted-foreground text-sm text-balance">{message}</p>
 			</div>
 		</div>
@@ -288,8 +291,7 @@ function StickerSection({
 								size="sm"
 								className="h-auto gap-1 p-0 text-xs text-muted-foreground"
 							>
-								Clear
-							</Button>
+								<UiText text="Clear" /></Button>
 						)}
 
 						{section.action?.type === "see-all" && section.action.category && (

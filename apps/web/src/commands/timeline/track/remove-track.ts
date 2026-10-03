@@ -14,6 +14,9 @@ export class RemoveTrackCommand extends Command {
 		this.savedState = editor.scenes.getActiveScene().tracks;
 		const updatedTracks: SceneTracks = {
 			...this.savedState,
+			main: this.savedState.main.id === this.trackId
+				? { ...this.savedState.main, elements: [], removedFromTimeline: true }
+				: this.savedState.main,
 			overlay: this.savedState.overlay.filter((track) => track.id !== this.trackId),
 			audio: this.savedState.audio.filter((track) => track.id !== this.trackId),
 		};

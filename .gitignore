@@ -26,3 +26,10 @@ target/
 .cargo-tools/
 
 rust-migration-notes.md
+# Desktop build output
+dist-desktop/
+
+apps/electron/web.tar.gz
+apps/electron/web-build.json
+
+.DS_Store

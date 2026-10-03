@@ -9,6 +9,7 @@ import { createTimelineAudioBuffer } from "@/media/audio";
 import type { SceneTracks } from "@/timeline";
 import type { MediaAsset } from "@/media/types";
 import { TICKS_PER_SECOND } from "@/wasm";
+import { requireMediaDuration } from "./duration";
 import { renderThumbnailDataUrl } from "./thumbnail";
 
 export type VideoFileData = {
@@ -33,7 +34,7 @@ export async function readVideoFile({
 	});
 
 	try {
-		const duration = await input.computeDuration();
+		const duration = requireMediaDuration(await input.computeDuration());
 		const videoTrack = await input.getPrimaryVideoTrack();
 
 		if (!videoTrack) {

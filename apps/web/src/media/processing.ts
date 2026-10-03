@@ -3,6 +3,7 @@ import { getMediaTypeFromFile } from "@/media/media-utils";
 import { formatStorageBytes } from "@/services/storage/quota";
 import { storageService } from "@/services/storage/service";
 import type { MediaAsset } from "@/media/types";
+import { readMediaDuration } from "./duration";
 import { readVideoFile } from "./mediabunny";
 import type { VideoFileData } from "./mediabunny";
 import { renderThumbnailDataUrl } from "./thumbnail";
@@ -161,7 +162,7 @@ export async function processMediaAssets({
 					});
 				}
 			} else if (fileType === "audio") {
-				duration = await getMediaDuration({ file });
+				duration = await readMediaDuration({ file });
 			}
 
 			processedAssets.push({
@@ -194,26 +195,3 @@ export async function processMediaAssets({
 	return processedAssets;
 }
 
-const getMediaDuration = ({ file }: { file: File }): Promise<number> => {
-	return new Promise((resolve, reject) => {
-		const element = document.createElement(
-			file.type.startsWith("video/") ? "video" : "audio",
-		) as HTMLVideoElement;
-		const objectUrl = URL.createObjectURL(file);
-
-		element.addEventListener("loadedmetadata", () => {
-			resolve(element.duration);
-			URL.revokeObjectURL(objectUrl);
-			element.remove();
-		});
-
-		element.addEventListener("error", () => {
-			reject(new Error("Could not load media"));
-			URL.revokeObjectURL(objectUrl);
-			element.remove();
-		});
-
-		element.src = objectUrl;
-		element.load();
-	});
-};

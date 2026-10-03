@@ -1,3 +1,5 @@
+
+import { UiText } from "@/i18n";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Settings05Icon } from "@hugeicons/core-free-icons";
 
@@ -10,10 +12,9 @@ export function EmptyView() {
 				strokeWidth={1}
 			/>
 			<div className="flex flex-col gap-2 text-center">
-				<p className="text-lg font-medium ">It's empty here</p>
+				<p className="text-lg font-medium "><UiText text="It's empty here" /></p>
 				<p className="text-muted-foreground text-sm text-balance">
-					Click an element on the timeline to edit its properties
-				</p>
+					<UiText text="Click an element on the timeline to edit its properties" /></p>
 			</div>
 		</div>
 	);

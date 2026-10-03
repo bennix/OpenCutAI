@@ -1,4 +1,5 @@
 "use client";
+import { UiLabels } from "@/i18n";
 
 import * as React from "react";
 import { Select as SelectPrimitive } from "radix-ui";
@@ -85,7 +86,7 @@ const SelectTrigger = React.forwardRef<
 					{icon}
 				</span>
 			)}
-			{children}
+			{props.asChild ? children : <UiLabels>{children}</UiLabels>}
 		</div>
 		<SelectPrimitive.Icon asChild>
 			<HugeiconsIcon icon={ArrowDownIcon} className="size-4" />
@@ -137,7 +138,7 @@ const SelectContent = React.forwardRef<
 		<SelectPrimitive.Content
 			ref={ref}
 			className={cn(
-				"bg-popover text-popover-foreground z-50 max-h-(--radix-select-content-available-height) min-w-32 overflow-hidden rounded-md border p-1 shadow-lg",
+				"bg-popover text-popover-foreground z-300 max-h-(--radix-select-content-available-height) min-w-32 overflow-hidden rounded-md border p-1 shadow-lg",
 				className,
 			)}
 			position={position}
@@ -154,7 +155,7 @@ const SelectContent = React.forwardRef<
 						"h-(--radix-select-trigger-height) w-full min-w-(--radix-select-trigger-width)",
 				)}
 			>
-				{children}
+				{props.asChild ? children : <UiLabels>{children}</UiLabels>}
 			</SelectPrimitive.Viewport>
 			<SelectScrollDownButton />
 		</SelectPrimitive.Content>
@@ -193,7 +194,7 @@ const SelectItem = React.forwardRef<
 				<Check className="size-3.5" />
 			</SelectPrimitive.ItemIndicator>
 		</span>
-		<SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
+		<SelectPrimitive.ItemText>{props.asChild ? children : <UiLabels>{children}</UiLabels>}</SelectPrimitive.ItemText>
 	</SelectPrimitive.Item>
 ));
 SelectItem.displayName = SelectPrimitive.Item.displayName;

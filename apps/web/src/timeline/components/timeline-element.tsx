@@ -1,4 +1,7 @@
 "use client";
+import { mediaTimeToSeconds } from "@/wasm";
+import { UiText } from "@/i18n";
+
 
 import { createContext, useContext } from "react";
 import { useEditor } from "@/editor/use-editor";
@@ -427,16 +430,14 @@ export function TimelineElement({
 						action="split"
 						icon={<HugeiconsIcon icon={ScissorIcon} />}
 					>
-						Split
-					</ActionMenuItem>
+						<UiText text="Split" /></ActionMenuItem>
 					<CopyMenuItem />
 					{selectedElements.length === 1 && (
 						<ActionMenuItem
 							action="duplicate-selected"
 							icon={<HugeiconsIcon icon={Copy01Icon} />}
 						>
-							Duplicate
-						</ActionMenuItem>
+							<UiText text="Duplicate" /></ActionMenuItem>
 					)}
 					{canElementHaveAudio(element) && hasAudio && (
 						<MuteMenuItem
@@ -488,14 +489,12 @@ export function TimelineElement({
 									handleRevealInMedia({ event })
 								}
 							>
-								Reveal media
-							</ContextMenuItem>
+								<UiText text="Reveal media" /></ContextMenuItem>
 							<ContextMenuItem
 								icon={<HugeiconsIcon icon={Exchange01Icon} />}
 								disabled
 							>
-								Replace media
-							</ContextMenuItem>
+								<UiText text="Replace media" /></ContextMenuItem>
 						</>
 					)}
 					<ContextMenuSeparator />
@@ -602,6 +601,14 @@ function ElementInner({
 					</button>
 				</div>
 			</div>
+
+            {(["entrance", "exit"] as const).map(edge => {
+                const transition = visibleElement.transitions?.[edge];
+                if (!transition) return null;
+                const seconds = mediaTimeToSeconds({time: visibleElement.duration});
+                const width = Math.min(50, transition.length / seconds * 100);
+                return <div key={edge} title={`${edge === "entrance" ? "片头" : "片尾"}转场 · ${transition.mode} · ${Math.min(transition.length, seconds / 2)} 秒`} className="absolute bottom-0 h-5 bg-purple-600/80 border border-purple-300 text-white text-[10px] overflow-hidden pointer-events-none z-10" style={{width:`${width}%`, minWidth:12, [edge === "entrance" ? "left" : "right"]:0}}>◀▶ 转场</div>;
+            })}
 
 			{isSelected && (
 				<>
@@ -1187,8 +1194,7 @@ function CopyMenuItem() {
 			action="copy-selected"
 			icon={<HugeiconsIcon icon={Copy01Icon} />}
 		>
-			Copy
-		</ActionMenuItem>
+			<UiText text="Copy" /></ActionMenuItem>
 	);
 }
 

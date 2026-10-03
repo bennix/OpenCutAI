@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/i18n";
+
 
 import { Button } from "./ui/button";
 import { useTheme } from "next-themes";
@@ -17,7 +19,7 @@ export function ThemeToggle({
 	iconClassName,
 	onToggle,
 }: ThemeToggleProps) {
-	const { theme, setTheme } = useTheme();
+	const { resolvedTheme, setTheme } = useTheme();
 
 	return (
 		<Button
@@ -25,7 +27,7 @@ export function ThemeToggle({
 			variant="ghost"
 			className={cn("size-8", className)}
 			onClick={(e) => {
-				setTheme(theme === "dark" ? "light" : "dark");
+				setTheme(resolvedTheme === "dark" ? "light" : "dark");
 				onToggle?.(e);
 			}}
 		>
@@ -33,7 +35,7 @@ export function ThemeToggle({
 				icon={Sun03Icon}
 				className={cn("!size-[1.1rem]", iconClassName)}
 			/>
-			<span className="sr-only">{theme === "dark" ? "Light" : "Dark"}</span>
+			<span className="sr-only"><UiText text={resolvedTheme === "dark" ? "Light" : "Dark"} /></span>
 		</Button>
 	);
 }

@@ -77,12 +77,17 @@ impl EffectPipeline {
                     label: Some("effects-fullscreen-shader"),
                     source: wgpu::ShaderSource::Wgsl(FULLSCREEN_SHADER_SOURCE.into()),
                 });
+        let mut pipelines = HashMap::new();
+        for (shader_id, shader_source) in [
+            (GAUSSIAN_BLUR_SHADER_ID, GAUSSIAN_BLUR_SHADER_SOURCE),
+            ("color-adjustment", include_str!("shaders/color_adjustment.wgsl")),
+        ] {
         let gaussian_blur_shader_module =
             context
                 .device()
                 .create_shader_module(wgpu::ShaderModuleDescriptor {
                     label: Some("effects-gaussian-blur-shader"),
-                    source: wgpu::ShaderSource::Wgsl(GAUSSIAN_BLUR_SHADER_SOURCE.into()),
+                    source: wgpu::ShaderSource::Wgsl(shader_source.into()),
                 });
         let pipeline_layout =
             context
@@ -131,8 +136,8 @@ impl EffectPipeline {
                     multiview_mask: None,
                     cache: None,
                 });
-        let pipelines =
-            HashMap::from([(GAUSSIAN_BLUR_SHADER_ID.to_string(), gaussian_blur_pipeline)]);
+        pipelines.insert(shader_id.to_string(), gaussian_blur_pipeline);
+        }
 
         Self {
             uniform_bind_group_layout,
@@ -268,6 +273,20 @@ fn pack_effect_uniforms(
     height: u32,
 ) -> Result<EffectUniformBuffer, EffectsError> {
     let shader = pass.shader.as_str();
+    if shader == "color-adjustment" {
+        let names = ["u_brightness", "u_contrast", "u_saturation", "u_temperature", "u_style", "u_amount"];
+        for name in pass.uniforms.keys() {
+            if !names.contains(&name.as_str()) {
+                return Err(EffectsError::UnsupportedUniform { shader: shader.into(), uniform: name.clone() });
+            }
+        }
+        return Ok(EffectUniformBuffer {
+            resolution: [width as f32, height as f32],
+            direction: [read_number_uniform(pass, names[4])?, read_number_uniform(pass, names[5])?],
+            scalars: [read_number_uniform(pass, names[0])?, read_number_uniform(pass, names[1])?, read_number_uniform(pass, names[2])?, read_number_uniform(pass, names[3])?],
+        });
+    }
+
     let sigma = read_number_uniform(pass, "u_sigma")?;
     let step = read_number_uniform(pass, "u_step")?;
     let direction = read_vec2_uniform(pass, "u_direction")?;
@@ -327,4 +346,24 @@ fn read_vec2_uniform(pass: &EffectPass, uniform: &str) -> Result<[f32; 2], Effec
         });
     }
     Ok([values[0], values[1]])
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn color_shader_validates() {
+        let module = naga::front::wgsl::parse_str(include_str!("shaders/color_adjustment.wgsl")).unwrap();
+        naga::valid::Validator::new(naga::valid::ValidationFlags::all(), naga::valid::Capabilities::all()).validate(&module).unwrap();
+    }
+    #[test]
+    fn color_uniforms_pack_without_blur_uniforms() {
+        let pass = EffectPass { shader: "color-adjustment".into(), uniforms: HashMap::from([
+            ("u_brightness".into(), UniformValue::Number(0.2)), ("u_contrast".into(), UniformValue::Number(1.1)),
+            ("u_saturation".into(), UniformValue::Number(0.8)), ("u_temperature".into(), UniformValue::Number(-0.5)),
+            ("u_style".into(), UniformValue::Number(6.0)), ("u_amount".into(), UniformValue::Number(0.7)),
+        ]) };
+        let packed = pack_effect_uniforms(&pass,1920,1080).unwrap();
+        assert_eq!(packed.scalars,[0.2,1.1,0.8,-0.5]); assert_eq!(packed.direction,[6.0,0.7]);
+    }
 }

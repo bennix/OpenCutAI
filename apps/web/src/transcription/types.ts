@@ -29,6 +29,8 @@ export interface TranscriptionProgress {
 
 export type TranscriptionModelId =
 	| "whisper-tiny"
+	| "whisper-base"
+	| "whisper-large-v3"
 	| "whisper-small"
 	| "whisper-medium"
 	| "whisper-large-v3-turbo";
@@ -38,6 +40,8 @@ export interface TranscriptionModel {
 	name: string;
 	huggingFaceId: string;
 	description: string;
+	downloadSize: string;
+	dtype?: "q4" | "q8";
 }
 
 export interface CaptionChunk {

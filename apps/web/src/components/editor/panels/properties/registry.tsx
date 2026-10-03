@@ -38,7 +38,7 @@ const TRANSFORM_PARAM_KEYS = [
 ] as const;
 
 const BLENDING_PARAM_KEYS = ["opacity", "blendMode"] as const;
-const AUDIO_PARAM_KEYS = ["volume", "muted"] as const;
+const AUDIO_PARAM_KEYS = ["volume", "muted", "fadeIn", "fadeOut"] as const;
 const TEXT_PARAM_KEYS = [
 	"content",
 	"fontFamily",
@@ -50,6 +50,11 @@ const TEXT_PARAM_KEYS = [
 	"textDecoration",
 	"letterSpacing",
 	"lineHeight",
+	"shadow.enabled",
+	"shadow.color",
+	"shadow.offsetX",
+	"shadow.offsetY",
+	"shadow.blur",
 	"background.enabled",
 	"background.color",
 	"background.cornerRadius",

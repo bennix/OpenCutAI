@@ -1,4 +1,6 @@
 "use client";
+import { UiText, useTranslation } from "@/i18n";
+
 
 import { useParams } from "next/navigation";
 import {
@@ -12,7 +14,6 @@ import { Timeline } from "@/timeline/components";
 import { PreviewPanel } from "@/preview/components";
 import { EditorHeader } from "@/components/editor/editor-header";
 import { EditorProvider } from "@/components/providers/editor-provider";
-import { Onboarding } from "@/components/editor/onboarding";
 import { MigrationDialog } from "@/project/components/migration-dialog";
 import { usePanelStore } from "@/editor/panel-store";
 import { usePasteMedia } from "@/media/use-paste-media";
@@ -48,7 +49,6 @@ export default function Editor() {
 					<div className="min-h-0 min-w-0 flex-1">
 						<EditorLayout />
 					</div>
-					<Onboarding />
 					<MigrationDialog />
 					<ChangelogNotification />
 				</div>
@@ -58,19 +58,20 @@ export default function Editor() {
 }
 
 function DegradedRendererBanner() {
+	const t = useTranslation();
 	const isDegraded = useEditor((e) => e.renderer.isDegraded);
 	const [dismissed, setDismissed] = useState(false);
 	if (!isDegraded || dismissed) return null;
 
 	return (
 		<div className="bg-accent border-b h-9 flex items-center justify-center gap-2 text-xs text-muted-foreground">
-			<span>For the best experience, open OpenCut in Chrome.</span>
+			<span><UiText text="For the best experience, open OpenCut in Chrome." /></span>
 			<Button
 				variant="text"
 				size="icon"
 				className="p-0 w-auto [&_svg]:size-3.5"
 				onClick={() => setDismissed(true)}
-				aria-label="Dismiss"
+				aria-label={t("Dismiss")}
 			>
 				<HugeiconsIcon icon={Cancel01Icon} />
 			</Button>

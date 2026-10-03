@@ -1,6 +1,13 @@
 "use client";
+import { UiText, useTranslation } from "@/i18n";
 
-import { useEffect, useState } from "react";
+
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+import { Download, Loader2 } from "lucide-react";
+import { fetchSoundFile, importSoundFiles } from "@/sounds/transfer";
+import { downloadBlob } from "@/utils/browser";
+import { useFileUpload } from "@/media/use-file-upload";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -38,11 +45,12 @@ import { HugeiconsIcon } from "@hugeicons/react";
 export function SoundsView() {
 	return (
 		<div className="flex h-full flex-col">
+			<ImportSoundButton />
 			<Tabs defaultValue="sound-effects" className="flex h-full flex-col">
 				<div className="px-3 pt-4 pb-0">
 					<TabsList>
-						<TabsTrigger value="sound-effects">Sound effects</TabsTrigger>
-						<TabsTrigger value="saved">Saved</TabsTrigger>
+						<TabsTrigger value="sound-effects"><UiText text="Sound effects" /></TabsTrigger>
+						<TabsTrigger value="saved"><UiText text="Saved" /></TabsTrigger>
 					</TabsList>
 				</div>
 				<Separator className="my-4" />
@@ -63,10 +71,24 @@ export function SoundsView() {
 	);
 }
 
+function ImportSoundButton() {
+ const t = useTranslation();
+ const [busy, setBusy] = useState(false);
+ const { openFilePicker, fileInputProps } = useFileUpload({ accept: "audio/*,.wav,.mp3,.ogg,.flac,.m4a,.aiff,.opus", multiple: true, onFilesSelected: async files => {
+  setBusy(true);
+  try { await importSoundFiles(files); toast.success(t("Sound added to timeline")); }
+  catch (error) { toast.error(t(error instanceof Error ? error.message : "Failed to add sound to timeline")); }
+  finally { setBusy(false); }
+ } });
+ return <div className="px-5 pt-4"><input {...fileInputProps} /><Button variant="outline" className="w-full" disabled={busy} onClick={openFilePicker}>{busy && <Loader2 className="size-4 animate-spin" />}{t(busy ? "Adding sound..." : "Import local sound")}</Button><p className="mt-2 text-xs text-muted-foreground">{t("Audio is saved in the project and added at the playhead. Multiple files are placed in order.")}</p></div>;
+}
+
 function SoundEffectsView() {
+	const t = useTranslation();
 	const {
 		topSoundEffects,
 		isLoading,
+		error: loadError,
 		searchQuery,
 		setSearchQuery,
 		scrollPosition,
@@ -86,6 +108,7 @@ function SoundEffectsView() {
 	const {
 		results: searchResults,
 		isLoading: isSearching,
+		error: searchError,
 		loadMore,
 		hasNextPage,
 		isLoadingMore,
@@ -95,9 +118,8 @@ function SoundEffectsView() {
 	});
 
 	const [playingId, setPlayingId] = useState<number | null>(null);
-	const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(
-		null,
-	);
+	const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
+	useEffect(() => () => { audioElement?.pause(); }, [audioElement]);
 
 	const { scrollAreaRef, handleScroll } = useInfiniteScroll({
 		onLoadMore: loadMore,
@@ -124,12 +146,13 @@ function SoundEffectsView() {
 				}
 
 				const response = await fetch(
-					"/api/sounds/search?page_size=50&sort=downloads",
+					`/api/sounds/search?page_size=20&commercial_only=${showCommercialOnly}`,
 				);
 
 				if (!shouldIgnore) {
 					if (!response.ok) {
-						throw new Error(`Failed to fetch: ${response.status}`);
+						const failure = await response.json().catch(() => null);
+						throw new Error(failure?.error ?? `Failed to fetch: ${response.status}`);
 					}
 
 					const data = await response.json();
@@ -170,6 +193,7 @@ function SoundEffectsView() {
 		setCurrentPage,
 		setHasNextPage,
 		setTotalCount,
+		showCommercialOnly,
 	]);
 
 	useEffect(() => {
@@ -206,7 +230,7 @@ function SoundEffectsView() {
 		audioElement?.pause();
 
 		if (sound.previewUrl) {
-			const audio = new Audio(sound.previewUrl);
+			const audio = new Audio(`/api/sounds/download?url=${encodeURIComponent(sound.previewUrl)}`);
 			audio.addEventListener("ended", () => {
 				setPlayingId(null);
 			});
@@ -225,9 +249,10 @@ function SoundEffectsView() {
 
 	return (
 		<div className="mt-1 flex h-full flex-col gap-5">
+			<p className="text-xs text-muted-foreground"><UiText text="Openly licensed audio from Wikimedia Commons. Attribution may be required; check the source license." /></p>
 			<div className="flex items-center gap-3">
 				<Input
-					placeholder="Search sound effects"
+					placeholder={t("Search sound effects")}
 					className="w-full"
 					containerClassName="w-full"
 					value={searchQuery}
@@ -250,19 +275,19 @@ function SoundEffectsView() {
 					<DropdownMenuContent align="end" className="w-56">
 						<DropdownMenuCheckboxItem
 							checked={showCommercialOnly}
-							onCheckedChange={() => toggleCommercialFilter()}
+							onCheckedChange={() => { toggleCommercialFilter(); setHasLoaded({ loaded: false }); }}
 						>
-							Show only commercially licensed
-						</DropdownMenuCheckboxItem>
+							<UiText text="CC0 / public domain only" /></DropdownMenuCheckboxItem>
 						<div className="text-muted-foreground px-2 py-1.5 text-xs">
 							{showCommercialOnly
-								? "Only showing sounds licensed for commercial use"
-								: "Showing all sounds regardless of license"}
+								? "No attribution required: CC0 and public domain"
+								: "Open licenses only: CC0, public domain, CC BY and CC BY-SA"}
 						</div>
 					</DropdownMenuContent>
 				</DropdownMenu>
 			</div>
 
+			{(searchQuery ? searchError : loadError) && <div role="alert" className="space-y-2 rounded border p-3 text-sm"><p>{t("Unable to load online sounds. You can import local audio or retry.")}</p><p className="text-xs text-muted-foreground">{searchQuery ? searchError : loadError}</p><Button variant="outline" size="sm" onClick={() => { setHasLoaded({ loaded: false }); useSoundsStore.getState().setLastSearchQuery({ query: "" }); useSoundsStore.getState().setSearchResults({ results: [] }); }}>{t("Retry")}</Button></div>}
 			<div className="relative h-full overflow-hidden">
 				<ScrollArea
 					className="h-full flex-1"
@@ -272,11 +297,10 @@ function SoundEffectsView() {
 					<div className="flex flex-col gap-4">
 						{isLoading && !searchQuery && (
 							<div className="text-muted-foreground text-sm">
-								Loading sounds...
-							</div>
+								<UiText text="Loading sounds..." /></div>
 						)}
 						{isSearching && searchQuery && (
-							<div className="text-muted-foreground text-sm">Searching...</div>
+							<div className="text-muted-foreground text-sm"><UiText text="Searching..." /></div>
 						)}
 						{displayedSounds.map((sound) => (
 							<AudioItem
@@ -288,13 +312,12 @@ function SoundEffectsView() {
 						))}
 						{!isLoading && !isSearching && displayedSounds.length === 0 && (
 							<div className="text-muted-foreground text-sm">
-								{searchQuery ? "No sounds found" : "No sounds available"}
+								{t(searchQuery ? "No sounds found" : "No sounds available")}
 							</div>
 						)}
 						{isLoadingMore && (
 							<div className="text-muted-foreground py-4 text-center text-sm">
-								Loading more sounds...
-							</div>
+								<UiText text="Loading more sounds..." /></div>
 						)}
 					</div>
 				</ScrollArea>
@@ -313,9 +336,8 @@ function SavedSoundsView() {
 	} = useSoundsStore();
 
 	const [playingId, setPlayingId] = useState<number | null>(null);
-	const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(
-		null,
-	);
+	const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
+	useEffect(() => () => { audioElement?.pause(); }, [audioElement]);
 
 	const [showClearDialog, setShowClearDialog] = useState(false);
 
@@ -333,7 +355,7 @@ function SavedSoundsView() {
 		audioElement?.pause();
 
 		if (sound.previewUrl) {
-			const audio = new Audio(sound.previewUrl);
+			const audio = new Audio(`/api/sounds/download?url=${encodeURIComponent(sound.previewUrl)}`);
 			audio.addEventListener("ended", () => {
 				setPlayingId(null);
 			});
@@ -358,7 +380,8 @@ function SavedSoundsView() {
 		id: savedSound.id,
 		name: savedSound.name,
 		description: "",
-		url: "",
+		url: savedSound.sourceUrl ?? "",
+		licenseUrl: savedSound.licenseUrl,
 		previewUrl: savedSound.previewUrl,
 		downloadUrl: savedSound.downloadUrl,
 		duration: savedSound.duration,
@@ -381,8 +404,7 @@ function SavedSoundsView() {
 		return (
 			<div className="flex h-full items-center justify-center">
 				<div className="text-muted-foreground text-sm">
-					Loading saved sounds...
-				</div>
+					<UiText text="Loading saved sounds..." /></div>
 			</div>
 		);
 	}
@@ -391,7 +413,7 @@ function SavedSoundsView() {
 		return (
 			<div className="flex h-full items-center justify-center">
 				<div className="text-destructive text-sm">
-					Error: {savedSoundsError}
+					<UiText text={"Error:"} />{savedSoundsError}
 				</div>
 			</div>
 		);
@@ -405,10 +427,9 @@ function SavedSoundsView() {
 					className="text-muted-foreground size-10"
 				/>
 				<div className="flex flex-col gap-2 text-center">
-					<p className="text-lg font-medium">No saved sounds</p>
+					<p className="text-lg font-medium"><UiText text="No saved sounds" /></p>
 					<p className="text-muted-foreground text-sm text-balance">
-						Click the heart icon on any sound to save it here
-					</p>
+						<UiText text="Click the heart icon on any sound to save it here" /></p>
 				</div>
 			</div>
 		);
@@ -428,33 +449,26 @@ function SavedSoundsView() {
 							size="sm"
 							className="text-muted-foreground hover:text-destructive h-auto !opacity-100"
 						>
-							Clear all
-						</Button>
+							<UiText text="Clear all" /></Button>
 					</DialogTrigger>
 					<DialogContent>
 						<DialogHeader>
-							<DialogTitle>Clear all saved sounds?</DialogTitle>
+							<DialogTitle><UiText text="Clear all saved sounds?" /></DialogTitle>
 							<DialogDescription>
-								This will permanently remove all {savedSounds.length} saved
-								sounds from your collection. This action cannot be undone.
-							</DialogDescription>
+								<UiText text={"This will permanently remove all"} />{savedSounds.length} <UiText text={"saved sounds from your collection. This action cannot be undone."} /></DialogDescription>
 						</DialogHeader>
 						<DialogFooter>
 							<Button variant="text" onClick={() => setShowClearDialog(false)}>
-								Cancel
-							</Button>
+								<UiText text="Cancel" /></Button>
 							<Button
 								variant="destructive"
-								onClick={async ({
-									stopPropagation,
-								}: React.MouseEvent<HTMLButtonElement>) => {
-									stopPropagation();
+								onClick={async (event: React.MouseEvent<HTMLButtonElement>) => {
+									event.stopPropagation();
 									await clearSavedSounds();
 									setShowClearDialog(false);
 								}}
 							>
-								Clear all sounds
-							</Button>
+								<UiText text="Clear all sounds" /></Button>
 						</DialogFooter>
 					</DialogContent>
 				</Dialog>
@@ -485,30 +499,36 @@ interface AudioItemProps {
 }
 
 function AudioItem({ sound, isPlaying, onPlay }: AudioItemProps) {
+	const t = useTranslation();
 	const { addSoundToTimeline, isSoundSaved, toggleSavedSound } =
 		useSoundsStore();
 	const isSaved = isSoundSaved({ soundId: sound.id });
+	const [busy, setBusy] = useState<"add" | "download" | null>(null);
+	const busyRef = useRef(false);
+	const [failure, setFailure] = useState<string | null>(null);
 
 	const handleClick = () => {
 		onPlay({ sound });
 	};
 
-	const handleSaveClick = ({
-		stopPropagation,
-	}: React.MouseEvent<HTMLButtonElement>) => {
-		stopPropagation();
+	const handleSaveClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+		event.stopPropagation();
 		toggleSavedSound({ soundEffect: sound });
 	};
 
-	const handleAddToTimeline = async ({
-		stopPropagation,
-	}: React.MouseEvent<HTMLButtonElement>) => {
-		stopPropagation();
-		await addSoundToTimeline({ sound });
+	const handleAddToTimeline = async (event: React.MouseEvent<HTMLButtonElement>) => {
+		event.stopPropagation();
+		if (busyRef.current) return;
+		busyRef.current = true; setBusy("add"); setFailure(null);
+		try {
+			if (await addSoundToTimeline({ sound })) toast.success(t("Sound added to timeline"));
+			else setFailure(t("Unable to add this sound. Retry or download and import it locally."));
+		} finally { busyRef.current = false; setBusy(null); }
 	};
 
 	return (
-		<div className="group flex items-center gap-3 opacity-100 hover:opacity-75">
+		<div className="rounded-md border p-3">
+		<div className="group flex items-center gap-3">
 			<button
 				type="button"
 				className="flex min-w-0 flex-1 items-center gap-3 text-left"
@@ -526,38 +546,26 @@ function AudioItem({ sound, isPlaying, onPlay }: AudioItemProps) {
 				<div className="min-w-0 flex-1 overflow-hidden">
 					<p className="truncate text-sm font-medium">{sound.name}</p>
 					<span className="text-muted-foreground block truncate text-xs">
-						{sound.username}
+						{sound.username} · {sound.license}
 					</span>
 				</div>
 			</button>
-
-			<div className="flex items-center gap-3 pr-2">
-				<Button
-					variant="text"
-					size="icon"
-					className="text-muted-foreground hover:text-foreground w-auto !opacity-100"
-					onClick={handleAddToTimeline}
-					title="Add to timeline"
-				>
-					<HugeiconsIcon icon={PlusSignIcon} />
-				</Button>
-				<Button
-					variant="text"
-					size="icon"
-					className={`hover:text-foreground w-auto !opacity-100 ${
-						isSaved
-							? "text-red-500 hover:text-red-600"
-							: "text-muted-foreground"
-					}`}
-					onClick={handleSaveClick}
-					title={isSaved ? "Remove from saved" : "Save sound"}
-				>
-					<HugeiconsIcon
-						icon={FavouriteIcon}
-						className={`${isSaved ? "fill-current" : ""}`}
-					/>
-				</Button>
-			</div>
+			<Button variant="text" size="icon" onClick={handleSaveClick} aria-label={t(isSaved ? "Remove from saved" : "Save sound")}><HugeiconsIcon icon={FavouriteIcon} className={isSaved ? "fill-current text-red-500" : ""} /></Button>
+		</div>
+		<div className="mt-3 flex flex-wrap gap-2">
+			<Button variant="outline" size="sm" disabled={!!busy || !(sound.downloadUrl || sound.previewUrl)} onClick={handleAddToTimeline}>
+				{busy === "add" ? <Loader2 className="size-4 animate-spin" /> : <HugeiconsIcon icon={PlusSignIcon} className="size-4" />}{t(busy === "add" ? "Adding sound..." : "Add to timeline")}
+			</Button>
+			<Button variant="outline" size="sm" disabled={!!busy || !(sound.downloadUrl || sound.previewUrl)} onClick={async () => {
+				if (busyRef.current) return;
+				busyRef.current = true; setBusy("download"); setFailure(null);
+				try { const file = await fetchSoundFile(sound); downloadBlob({ blob: file, filename: file.name }); }
+				catch (error) { const message = t(error instanceof Error ? error.message : "Sound download failed"); setFailure(message); toast.error(message); }
+				finally { busyRef.current = false; setBusy(null); }
+			}}>{busy === "download" ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}{t(busy === "download" ? "Downloading sound..." : "Download sound")}</Button>
+			{sound.url && <a className="self-center text-xs text-primary underline" href={sound.url} target="_blank" rel="noreferrer">{t("Source & license")}</a>}
+		</div>
+		{failure && <p role="alert" className="mt-2 text-xs text-destructive">{failure}</p>}
 		</div>
 	);
 }

@@ -1,3 +1,5 @@
+
+import { UiText } from "@/i18n";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { UploadIcon } from "@hugeicons/core-free-icons";
 
@@ -40,9 +42,9 @@ export function MediaDragOverlay({
 
 			<div className="space-y-2">
 				<p className="text-muted-foreground max-w-sm text-xs">
-					{isProcessing
+					<UiText text={isProcessing
 						? `Processing your files (${progress}%)`
-						: "Drag and drop videos, photos, and audio files here"}
+						: "Drag and drop videos, photos, and audio files here"} />
 				</p>
 			</div>
 

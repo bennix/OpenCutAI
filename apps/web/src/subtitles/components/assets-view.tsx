@@ -1,3 +1,5 @@
+
+import { UiText, useTranslation } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { PanelView } from "@/components/editor/panels/assets/views/base-panel";
 import {
@@ -7,7 +9,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { useReducer, useRef, useState } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import { extractTimelineAudio } from "@/media/mediabunny";
 import { useEditor } from "@/editor/use-editor";
 import { TRANSCRIPTION_DIAGNOSTICS_SCOPE } from "@/transcription/diagnostics";
@@ -39,6 +41,10 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import type { DiagnosticSeverity } from "@/diagnostics/types";
+
+import { DEFAULT_TRANSCRIPTION_MODEL, TRANSCRIPTION_MODELS } from "@/transcription/models";
+import { getDownloadedModels } from "@/transcription/model-cache";
+import type { TranscriptionModelId } from "@/transcription/types";
 
 const DIAGNOSTIC_BUTTON_VARIANT: Record<
 	DiagnosticSeverity,
@@ -84,6 +90,26 @@ function processingReducer(
 /* eslint-enable opencut/prefer-object-params */
 
 export function Captions() {
+	const t = useTranslation();
+	const [selectedModel, setSelectedModel] = useState<TranscriptionModelId>(DEFAULT_TRANSCRIPTION_MODEL);
+	const [downloadedModels, setDownloadedModels] = useState<TranscriptionModelId[]>([]);
+	useEffect(() => {
+		const stored = localStorage.getItem("opencut-whisper-model");
+		const model = TRANSCRIPTION_MODELS.find((item) => item.id === stored);
+		if (model) setSelectedModel(model.id);
+		void getDownloadedModels().then(setDownloadedModels).catch(() => {});
+	}, []);
+	const downloadModel = async () => {
+		dispatch({ type: "start", step: "Downloading Whisper model..." });
+		try {
+			await navigator.storage?.persist?.();
+			await transcriptionService.downloadModel({ modelId: selectedModel, onProgress: handleProgress });
+			setDownloadedModels(await getDownloadedModels());
+			dispatch({ type: "succeed", warnings: [] });
+		} catch (error) {
+			dispatch({ type: "fail", error: error instanceof Error ? error.message : "Failed to download model" });
+		}
+	};
 	const [selectedLanguage, setSelectedLanguage] =
 		useState<TranscriptionLanguage>("auto");
 	const [processing, dispatch] = useReducer(processingReducer, IDLE_STATE);
@@ -134,6 +160,7 @@ export function Captions() {
 
 			const result = await transcriptionService.transcribe({
 				audioData: samples,
+				modelId: selectedModel,
 				language: selectedLanguage === "auto" ? undefined : selectedLanguage,
 				onProgress: handleProgress,
 			});
@@ -268,8 +295,7 @@ export function Captions() {
 							className="items-center justify-center gap-1.5"
 						>
 							<HugeiconsIcon icon={CloudUploadIcon} />
-							Import
-						</Button>
+							<UiText text="Import" /></Button>
 					</div>
 				</TooltipProvider>
 			}
@@ -288,6 +314,20 @@ export function Captions() {
 				className="flex-1"
 			>
 				<SectionContent className="flex flex-col gap-4 h-full pt-1">
+					<div className="space-y-3 text-sm">
+						<p><UiText text="Local Whisper · Audio stays on this device" /></p>
+						<label htmlFor="whisper-model"><UiText text="Whisper model weights" /></label>
+						<select id="whisper-model" className="w-full border rounded p-2 bg-background" disabled={isProcessing} value={selectedModel} onChange={(event) => {
+							const model = TRANSCRIPTION_MODELS.find((item) => item.id === event.target.value);
+							if (model) { setSelectedModel(model.id); localStorage.setItem("opencut-whisper-model", model.id); }
+						}}>
+							{TRANSCRIPTION_MODELS.map((model) => <option key={model.id} value={model.id}>{model.name} · {model.downloadSize}</option>)}
+						</select>
+						<p className="text-xs text-muted-foreground">{t(TRANSCRIPTION_MODELS.find((model) => model.id === selectedModel)?.description ?? "")}</p>
+						<Button variant="outline" className="w-full" disabled={isProcessing} onClick={downloadModel}><UiText text={downloadedModels.includes(selectedModel) ? "Load downloaded model" : "Download model weights"} /></Button>
+						<p className="text-xs text-muted-foreground"><UiText text="Weights download from Hugging Face and are cached locally. Larger models need more memory and time. Clearing app data removes downloaded weights." /></p>
+						{downloadedModels.length > 0 && <p className="text-xs"><UiText text="Downloaded models" />: {TRANSCRIPTION_MODELS.filter((model) => downloadedModels.includes(model.id)).map((model) => model.name).join(", ")}</p>}
+					</div>
 					<SectionFields>
 						<SectionField label="Language">
 							<Select
@@ -298,7 +338,7 @@ export function Captions() {
 									<SelectValue placeholder="Select a language" />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="auto">Auto detect</SelectItem>
+									<SelectItem value="auto"><UiText text="Auto detect" /></SelectItem>
 									{TRANSCRIPTION_LANGUAGES.map((language) => (
 										<SelectItem key={language.code} value={language.code}>
 											{language.name}
@@ -316,11 +356,11 @@ export function Captions() {
 						disabled={isProcessing || activeDiagnostics.length > 0}
 					>
 						{isProcessing && <Spinner className="mr-1" />}
-						{isProcessing ? processing.step : "Generate transcript"}
+						{t(isProcessing ? processing.step : "Generate transcript")}
 					</Button>
 					{error && (
 						<div className="bg-destructive/10 border-destructive/20 rounded-md border p-3">
-							<p className="text-destructive text-sm">{error}</p>
+							<p className="text-destructive text-sm">{t(error)}</p>
 						</div>
 					)}
 					{warnings.length > 0 && (

@@ -1,4 +1,6 @@
 "use client";
+import { UiText, useTranslation } from "@/i18n";
+
 
 import {
 	Sheet,
@@ -26,6 +28,7 @@ import { toast } from "sonner";
 import { useEditor } from "@/editor/use-editor";
 
 export function ScenesView({ children }: { children: React.ReactNode }) {
+	const t = useTranslation();
 	const editor = useEditor();
 	const scenes = editor.scenes.getScenes();
 	const currentScene = editor.scenes.getActiveScene();
@@ -113,7 +116,7 @@ export function ScenesView({ children }: { children: React.ReactNode }) {
 							onClick={handleSelectMode}
 						>
 							<ListCheck />
-							{isSelectMode ? "Cancel" : "Select"}
+							<UiText text={isSelectMode ? "Cancel" : "Select"} />
 						</Button>
 						{isSelectMode && (
 							<DeleteDialog
@@ -128,7 +131,7 @@ export function ScenesView({ children }: { children: React.ReactNode }) {
 										size="sm"
 									>
 										<Trash2 />
-										Delete ({selectedScenes.size})
+										<UiText text={"Delete ("} />{selectedScenes.size})
 									</Button>
 								}
 							/>
@@ -136,8 +139,7 @@ export function ScenesView({ children }: { children: React.ReactNode }) {
 					</div>
 					{scenes.length === 0 ? (
 						<div className="text-muted-foreground text-sm">
-							No scenes available
-						</div>
+							<UiText text="No scenes available" /></div>
 					) : (
 						<div className="space-y-2">
 							{scenes.map((scene) => (
@@ -155,7 +157,7 @@ export function ScenesView({ children }: { children: React.ReactNode }) {
 									)}
 									onClick={() => handleSceneSwitch(scene.id)}
 								>
-									<span>{scene.name}</span>
+									<span>{scene.isMain && scene.name === "Main scene" ? t("Main scene") : scene.name}</span>
 									<div className="flex items-center gap-2">
 										{((isSelectMode && selectedScenes.has(scene.id)) ||
 											(!isSelectMode && currentScene?.id === scene.id)) && (
@@ -195,23 +197,20 @@ function DeleteDialog({
 			<DialogTrigger asChild>{trigger}</DialogTrigger>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Delete Scenes</DialogTitle>
+					<DialogTitle><UiText text="Delete Scenes" /></DialogTitle>
 					<DialogDescription>
-						Are you sure you want to delete {count} scene
-						{count === 1 ? "" : "s"}? This action cannot be undone.
-					</DialogDescription>
+						<UiText text="Are you sure you want to delete" />{count} scene
+						{count === 1 ? "" : "s"}<UiText text="? This action cannot be undone." /></DialogDescription>
 				</DialogHeader>
 				<DialogFooter>
 					<Button variant="outline" onClick={() => setOpen(false)}>
-						Cancel
-					</Button>
+						<UiText text="Cancel" /></Button>
 					<Button
 						variant="destructive"
 						onClick={handleDelete}
 						disabled={disabled}
 					>
-						Delete
-					</Button>
+						<UiText text="Delete" /></Button>
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>

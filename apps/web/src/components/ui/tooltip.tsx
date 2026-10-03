@@ -1,3 +1,4 @@
+import { UiText } from "@/i18n";
 import { cva, type VariantProps } from "class-variance-authority";
 import { Tooltip as TooltipPrimitive } from "radix-ui";
 import * as React from "react";
@@ -68,7 +69,7 @@ const TooltipContent = React.forwardRef<
 				/>
 			</svg>
 		)}
-		{props.children}
+		{typeof props.children === "string" ? <UiText text={props.children} /> : props.children}
 	</TooltipPrimitive.Content>
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;

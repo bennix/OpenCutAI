@@ -1,4 +1,5 @@
 "use client";
+import { UiLabels } from "@/i18n";
 
 import * as React from "react";
 import { Label as LabelPrimitive } from "radix-ui";
@@ -19,6 +20,7 @@ const Label = React.forwardRef<
 		ref={ref}
 		className={cn(labelVariants(), className)}
 		{...props}
+		children={props.asChild ? props.children : <UiLabels>{props.children}</UiLabels>}
 	/>
 ));
 Label.displayName = LabelPrimitive.Root.displayName;

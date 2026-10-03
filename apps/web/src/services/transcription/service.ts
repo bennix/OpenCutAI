@@ -18,6 +18,10 @@ class TranscriptionService {
 	private isInitialized = false;
 	private isInitializing = false;
 
+	async downloadModel({ modelId, onProgress }: { modelId: TranscriptionModelId; onProgress?: ProgressCallback }): Promise<void> {
+		await this.ensureWorker({ modelId, onProgress });
+	}
+
 	async transcribe({
 		audioData,
 		language = "auto",
@@ -114,6 +118,10 @@ class TranscriptionService {
 		this.worker = new Worker(new URL("./worker.ts", import.meta.url), {
 			type: "module",
 		});
+		this.worker.addEventListener("error", (event) => {
+			const type = this.isInitializing ? "init-error" : "transcribe-error";
+			this.worker?.dispatchEvent(new MessageEvent("message", { data: { type, error: event.message || "Whisper worker failed" } }));
+		});
 
 		return new Promise((resolve, reject) => {
 			if (!this.worker) {
@@ -155,6 +163,7 @@ class TranscriptionService {
 			this.worker.postMessage({
 				type: "init",
 				modelId: model.huggingFaceId,
+				dtype: model.dtype ?? "q4",
 			} satisfies WorkerMessage);
 		});
 	}

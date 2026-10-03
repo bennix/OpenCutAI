@@ -12,10 +12,13 @@ import {
 	Settings01Icon,
 	SlidersHorizontalIcon,
 	ColorsIcon,
+	Film01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 
 export const TAB_KEYS = [
+	"ai",
+	"director",
 	"media",
 	"sounds",
 	"text",
@@ -36,6 +39,8 @@ const createHugeiconsIcon =
 	);
 
 export const tabs = {
+	director: { icon: createHugeiconsIcon({ icon: Film01Icon }), label: "Storyboard director" },
+	ai: { icon: createHugeiconsIcon({ icon: ColorsIcon }), label: "AI" },
 	media: {
 		icon: createHugeiconsIcon({ icon: Folder03Icon }),
 		label: "Media",
@@ -81,7 +86,12 @@ export type MediaViewMode = "grid" | "list";
 export type MediaSortKey = "name" | "type" | "duration" | "size";
 export type MediaSortOrder = "asc" | "desc";
 
+export type SettingsSection = "project-info" | "background" | "ai" | "general";
+
 interface AssetsPanelStore {
+	settingsSection: SettingsSection;
+	setSettingsSection: (section: SettingsSection) => void;
+	openAiSettings: () => void;
 	activeTab: Tab;
 	setActiveTab: (tab: Tab) => void;
 	highlightMediaId: string | null;
@@ -100,6 +110,9 @@ export const useAssetsPanelStore = create<AssetsPanelStore>()(
 	persist(
 		(set) => ({
 			activeTab: "media",
+			settingsSection: "project-info",
+			setSettingsSection: (section) => set({ settingsSection: section }),
+			openAiSettings: () => set({ activeTab: "settings", settingsSection: "ai" }),
 			setActiveTab: (tab) => set({ activeTab: tab }),
 			highlightMediaId: null,
 			requestRevealMedia: (mediaId) =>

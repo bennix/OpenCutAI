@@ -1,3 +1,4 @@
+import { SUBTITLE_SHADOW } from "@/text/shadow";
 import { FONT_SIZE_SCALE_REFERENCE } from "@/text/typography";
 import {
 	getTextVisualRect,
@@ -320,6 +321,11 @@ export function buildSubtitleTextElement({
 		params: {
 			...DEFAULTS.text.element.params,
 			content,
+			"shadow.enabled": SUBTITLE_SHADOW.enabled,
+			"shadow.color": SUBTITLE_SHADOW.color,
+			"shadow.offsetX": SUBTITLE_SHADOW.offsetX,
+			"shadow.offsetY": SUBTITLE_SHADOW.offsetY,
+			"shadow.blur": SUBTITLE_SHADOW.blur,
 			fontSize: style.fontSize,
 			fontFamily: style.fontFamily,
 			color: style.color,

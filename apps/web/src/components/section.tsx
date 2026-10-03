@@ -1,3 +1,4 @@
+import { UiText } from "@/i18n";
 import { createContext, useContext, useEffect, useState } from "react";
 import { cn } from "@/utils/ui";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -185,12 +186,12 @@ export function SectionTitle({
 				className={cn("cursor-pointer", titleClass)}
 				onClick={onClick}
 			>
-				{children}
+				{typeof children === "string" ? <UiText text={children} /> : children}
 			</button>
 		);
 	}
 
-	return <span className={titleClass}>{children}</span>;
+	return <span className={titleClass}>{typeof children === "string" ? <UiText text={children} /> : children}</span>;
 }
 
 export function SectionFields({
@@ -220,7 +221,7 @@ export function SectionField({
 		<div className={cn("flex flex-col gap-2", className)}>
 			<div className="flex h-4 items-center gap-1.5">
 				{beforeLabel}
-				<Label>{label}</Label>
+				<Label><UiText text={label} /></Label>
 			</div>
 			{children}
 		</div>

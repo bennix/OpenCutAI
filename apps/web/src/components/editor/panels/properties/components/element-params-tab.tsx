@@ -1,5 +1,8 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { useEditor } from "@/editor/use-editor";
+import { useTranslation } from "@/i18n";
 import { resolveAnimationPathValueAtTime } from "@/animation";
 import { Section, SectionContent, SectionFields } from "@/components/section";
 import { useElementPlayhead } from "@/components/editor/panels/properties/hooks/use-element-playhead";
@@ -12,6 +15,7 @@ import {
 	writeElementParamValue,
 	type ElementParamDefinition,
 } from "@/params/registry";
+import { trackStylePreview } from "@/timeline/track-style";
 import type { TimelineElement } from "@/timeline";
 import type { MediaTime } from "@/wasm";
 
@@ -26,6 +30,8 @@ export function ElementParamsTab({
 	paramKeys?: readonly string[];
 	sectionKey: string;
 }) {
+	const editor = useEditor();
+	const t = useTranslation();
 	const { localTime, isPlayheadWithinElementRange } = useElementPlayhead({
 		startTime: element.startTime,
 		duration: element.duration,
@@ -38,6 +44,20 @@ export function ElementParamsTab({
 	return (
 		<Section sectionKey={`${element.id}:${sectionKey}`}>
 			<SectionContent className="pt-4">
+				{element.type === "text" && sectionKey === "text" && (
+					<div className="mb-3 space-y-2 px-3">
+						<p className="text-xs text-muted-foreground">{t("Double-click subtitles in the preview to edit. Click outside to save; Escape cancels. Undo with ⌘Z.")}</p>
+						<Button variant="outline" size="sm" onClick={() => {
+							editor.timeline.commitPreview();
+							const track = editor.scenes.getActiveScene().tracks.overlay.find((item) => item.id === trackId);
+							if (!track) return;
+							const current = track.elements.find(item => item.id === element.id);
+							if (!current) return;
+							const style = Object.fromEntries(Object.entries(buildValues({ element: current, params })).filter(([key]) => key !== "content"));
+							editor.timeline.updateElements({ updates: track.elements.filter((item) => item.type === "text").map((item) => ({ trackId, elementId: item.id, patch: trackStylePreview(item, style) })) });
+						}}>{t("Apply style to entire subtitle track")}</Button>
+					</div>
+				)}
 				<SectionFields>
 					{params
 						.filter((param) => isVisible({ param, values: baseValues }))

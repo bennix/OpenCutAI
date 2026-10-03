@@ -117,7 +117,7 @@ export class SceneExporter extends EventEmitter<SceneExporterEvents> {
 					numberOfChannels: this.audioBuffer.numberOfChannels,
 					bitrate: 192000,
 				});
-				if (!supported) audioCodec = "opus";
+				if (!supported) throw new Error("AAC audio encoding is unavailable. Export without audio or choose WebM.");
 			}
 
 			audioSource = new AudioBufferSource({

@@ -1,4 +1,6 @@
 "use client";
+import { UiText, useTranslation } from "@/i18n";
+
 
 import { useState } from "react";
 import Link from "next/link";
@@ -26,6 +28,7 @@ import {
 } from "./ui/context-menu";
 
 export function Header() {
+	const t = useTranslation();
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const closeMenu = () => setIsMenuOpen(false);
 
@@ -126,8 +129,7 @@ export function Header() {
 						</Link>
 						<Link href="/projects">
 							<Button className="text-sm">
-								Projects
-								<ArrowRight className="size-4" />
+								<UiText text="Projects" /><ArrowRight className="size-4" />
 							</Button>
 						</Link>
 						<ThemeToggle />
@@ -143,7 +145,7 @@ export function Header() {
 					<div className="relative h-full">
 						<button
 							type="button"
-							aria-label="Close menu"
+							aria-label={t("Close menu")}
 							className="absolute inset-0"
 							onClick={closeMenu}
 							onKeyDown={(event) => {

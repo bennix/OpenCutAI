@@ -1,4 +1,6 @@
 "use client";
+import { useTranslation } from "@/i18n";
+
 
 import { useCallback, useEffect, useRef } from "react";
 import { usePreviewViewport } from "@/preview/components/preview-viewport";
@@ -21,12 +23,15 @@ export function TextEditOverlay({
 	elementId,
 	element,
 	onCommit,
+	onCancel,
 }: {
 	trackId: string;
 	elementId: string;
 	element: TextElement;
 	onCommit: () => void;
+	onCancel: () => void;
 }) {
+	const t = useTranslation();
 	const editor = useEditor();
 	const viewport = usePreviewViewport();
 	const divRef = useRef<HTMLDivElement>(null);
@@ -47,20 +52,24 @@ export function TextEditOverlay({
 		if (!div) return;
 		const text = div.innerText;
 		editor.timeline.previewElements({
-			updates: [{ trackId, elementId, updates: { params: { content: text } } }],
+			updates: [{ trackId, elementId, updates: { params: { ...element.params, content: text } } }],
 		});
-	}, [editor.timeline, trackId, elementId]);
+	}, [editor.timeline, trackId, elementId, element.params]);
 
 	const handleKeyDown = useCallback(
 		({ event }: { event: React.KeyboardEvent }) => {
 			const { key } = event;
 			if (key === "Escape") {
 				event.preventDefault();
-				onCommit();
+				onCancel();
 				return;
 			}
+			if (key === "Enter" && (event.metaKey || event.ctrlKey)) {
+				event.preventDefault();
+				onCommit();
+			}
 		},
-		[onCommit],
+		[onCommit, onCancel],
 	);
 
 	const canvasSize = editor.project.getActive().settings.canvasSize;
@@ -122,7 +131,7 @@ export function TextEditOverlay({
 				suppressContentEditableWarning
 				tabIndex={0}
 				role="textbox"
-				aria-label="Edit text"
+				aria-label={t("Edit text")}
 				className="cursor-text select-text outline-none whitespace-pre"
 				style={{
 					fontSize: resolvedTextLayout.scaledFontSize,

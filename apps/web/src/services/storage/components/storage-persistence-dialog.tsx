@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/i18n";
+
 
 import { Button } from "@/components/ui/button";
 import {
@@ -18,22 +20,18 @@ export function StoragePersistenceDialog() {
 		<Dialog open={showDialog} onOpenChange={(open) => !open && onDismiss()}>
 			<DialogContent className="sm:max-w-md">
 				<DialogHeader>
-					<DialogTitle>Don't lose your projects</DialogTitle>
+					<DialogTitle><UiText text="Don't lose your projects" /></DialogTitle>
 				</DialogHeader>
 				<DialogBody>
 					<p className="text-base text-muted-foreground">
-						Your browser can automatically delete your projects when storage
-						runs low.
-					</p>
+						<UiText text="Your browser can automatically delete your projects when storage runs low." /></p>
 					<p className="text-base text-muted-foreground">
-						Allow OpenCut to protect them?
-					</p>
+						<UiText text="Allow OpenCut to protect them?" /></p>
 				</DialogBody>
 				<DialogFooter>
 					<Button variant="outline" onClick={onDismiss}>
-						Not now
-					</Button>
-					<Button onClick={onConfirm}>Allow</Button>
+						<UiText text="Not now" /></Button>
+					<Button onClick={onConfirm}><UiText text="Allow" /></Button>
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>

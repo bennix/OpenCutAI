@@ -1,3 +1,35 @@
+# OpenCut AI
+
+An open-source desktop video editor with AI storyboards, screen recording, editable subtitles, effects, transitions and persistent sound assets.
+
+**[Website](https://bennix.github.io/OpenCutAI/) · [Download](https://github.com/bennix/OpenCutAI/releases/latest)**
+
+- macOS Apple Silicon: signed and Apple-notarized DMG.
+- Windows x64: NSIS installer, unsigned.
+- Linux x64: DEB and RPM built on GitHub Actions.
+- Local editing needs no subscription. AI generation requires your own provider/API credentials.
+- Screen/system-audio capture support depends on the operating system; Linux Wayland/portal support varies.
+
+## Development
+
+```sh
+bun install
+bun run dev:web
+bun run dev:desktop
+```
+
+## Desktop packaging
+
+```sh
+bun run package:desktop
+```
+
+Build on the target platform to bundle the correct native dependencies. GitHub's **Desktop release** workflow builds Windows and Linux packages and uploads to an existing release. macOS release signing/notarization happens on the authorized developer's machine; credentials are never committed.
+
+Landing page source lives in `site/` and deploys through GitHub Pages. The application is based on OpenCut Classic and retains its MIT license and notices.
+
+---
+
 # OpenCut (Legacy)
 
 This is the original OpenCut codebase. It's archived and no longer maintained.

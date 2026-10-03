@@ -1,4 +1,5 @@
 "use client";
+import { UiLabels } from "@/i18n";
 
 import * as React from "react";
 import { ContextMenu as ContextMenuPrimitive } from "radix-ui";
@@ -76,7 +77,7 @@ const ContextMenuSubTrigger = React.forwardRef<
 			{icon && (
 				<span className="size-4 shrink-0 text-muted-foreground">{icon}</span>
 			)}
-			{children}
+			{props.asChild ? children : <UiLabels>{children}</UiLabels>}
 			<HugeiconsIcon
 				icon={ArrowRightIcon}
 				className="ml-auto text-muted-foreground/80"
@@ -158,7 +159,7 @@ const ContextMenuItem = React.forwardRef<
 						{icon}
 					</span>
 				)}
-				{children}
+				{props.asChild ? children : <UiLabels>{children}</UiLabels>}
 				{textRight && (
 					<span className="ml-auto text-[0.60rem] tracking-widest text-muted-foreground/80 mb-0.5">
 						{textRight}
@@ -199,7 +200,7 @@ const ContextMenuCheckboxItem = React.forwardRef<
 			{icon && (
 				<span className="size-4 shrink-0 text-muted-foreground">{icon}</span>
 			)}
-			{children}
+			{props.asChild ? children : <UiLabels>{children}</UiLabels>}
 		</ContextMenuPrimitive.CheckboxItem>
 	),
 );
@@ -226,7 +227,7 @@ const ContextMenuRadioItem = React.forwardRef<
 		{icon && (
 			<span className="size-4 shrink-0 text-muted-foreground">{icon}</span>
 		)}
-		{children}
+		{props.asChild ? children : <UiLabels>{children}</UiLabels>}
 	</ContextMenuPrimitive.RadioItem>
 ));
 ContextMenuRadioItem.displayName = ContextMenuPrimitive.RadioItem.displayName;
@@ -250,7 +251,7 @@ const ContextMenuLabel = React.forwardRef<
 		{icon && (
 			<span className="size-4 shrink-0 text-muted-foreground">{icon}</span>
 		)}
-		{children}
+		{props.asChild ? children : <UiLabels>{children}</UiLabels>}
 	</ContextMenuPrimitive.Label>
 ));
 ContextMenuLabel.displayName = ContextMenuPrimitive.Label.displayName;

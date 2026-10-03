@@ -40,6 +40,7 @@ export class PlaybackManager {
 	}
 
 	play(): void {
+		if (this.isPlaying) return;
 		const maxTime = this.editor.timeline.getTotalDuration();
 		if (maxTime <= 0) {
 			return;
@@ -70,6 +71,13 @@ export class PlaybackManager {
 
 	seek({ time }: { time: MediaTime }): void {
 		this.currentTime = this.clampTimeToTimeline(time);
+		if (
+			this.isPlaying &&
+			this.currentTime >= this.editor.timeline.getTotalDuration()
+		) {
+			this.isPlaying = false;
+			this.stopTimer();
+		}
 		if (this.isPlaying) {
 			this.playbackStartWallTime = performance.now();
 			this.playbackStartTime = this.currentTime;
@@ -223,13 +231,15 @@ export class PlaybackManager {
 		const newTime = fps ? roundFrameTime({ time: rawTime, fps }) : rawTime;
 		const maxTime = this.editor.timeline.getTotalDuration();
 
-		if (newTime >= maxTime) {
-			this.pause();
+		if (rawTime >= maxTime || newTime >= maxTime) {
 			this.currentTime = maxTime;
+			this.isPlaying = false;
+			this.stopTimer();
 			this.notify();
-		this.notifySeek(maxTime);
-		this.dispatchSeekEvent(maxTime);
-		return;
+			this.notifyUpdate(maxTime);
+			this.notifySeek(maxTime);
+			this.dispatchSeekEvent(maxTime);
+			return;
 		}
 
 		this.currentTime = newTime;

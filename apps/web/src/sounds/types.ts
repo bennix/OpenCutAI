@@ -15,6 +15,7 @@ export interface SoundEffect {
 	username: string;
 	tags: string[];
 	license: string;
+	licenseUrl?: string;
 	created: string;
 	downloads: number;
 	rating: number;
@@ -22,6 +23,8 @@ export interface SoundEffect {
 }
 
 export interface SavedSound {
+	sourceUrl?: string;
+	licenseUrl?: string;
 	id: number; // freesound id
 	name: string;
 	username: string;

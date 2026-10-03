@@ -296,6 +296,20 @@ export class AudioManager {
 				this.playbackLatencyCompensationSeconds +
 				(timelineTime - this.playbackStartTime);
 
+			const gainStart = Math.max(startTimestamp, audioContext.currentTime);
+			this.scheduleClipGainAutomation({
+				audioContext,
+				clip,
+				clipGain,
+				startTimestamp: gainStart,
+				startLocalTime:
+					timelineTime - clip.startTime + gainStart - startTimestamp,
+				endLocalTime: Math.min(
+					clip.duration,
+					timelineTime - clip.startTime + buffer.duration,
+				),
+			});
+
 			if (startTimestamp >= audioContext.currentTime) {
 				node.start(startTimestamp);
 				consecutiveDroppedBufferCount = 0;
@@ -480,12 +494,14 @@ export class AudioManager {
 		clipGain,
 		startTimestamp,
 		startLocalTime,
+		endLocalTime,
 	}: {
 		audioContext: AudioContext;
 		clip: AudioClipSource;
 		clipGain: GainNode;
 		startTimestamp: number;
 		startLocalTime: number;
+		endLocalTime?: number;
 	}): void {
 		clipGain.gain.cancelScheduledValues(startTimestamp);
 		clipGain.gain.setValueAtTime(clip.volume, startTimestamp);
@@ -497,7 +513,7 @@ export class AudioManager {
 		const points = buildAudioGainAutomation({
 			element: clip.timelineElement,
 			fromLocalTime: startLocalTime,
-			toLocalTime: clip.duration,
+			toLocalTime: endLocalTime ?? clip.duration,
 		});
 
 		if (points.length === 0) {

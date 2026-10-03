@@ -1,4 +1,5 @@
 "use client";
+import { UiText } from "@/i18n";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -34,7 +35,7 @@ export function PropertiesPanel() {
 		return (
 			<div className="panel bg-background flex h-full flex-col items-center justify-center overflow-hidden rounded-sm border">
 				<p className="text-muted-foreground text-sm">
-					{selectedElements.length} elements selected.0
+					<UiText text={`${selectedElements.length} elements selected.0`} />
 				</p>
 			</div>
 		);
@@ -87,7 +88,7 @@ export function PropertiesPanel() {
 									{tab.icon}
 								</Button>
 							</TooltipTrigger>
-							<TooltipContent side="right">{tab.label}</TooltipContent>
+							<TooltipContent side="right"><UiText text={tab.label} /></TooltipContent>
 						</Tooltip>
 					))}
 				</div>

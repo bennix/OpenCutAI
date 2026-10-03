@@ -1,4 +1,6 @@
 "use client";
+import { UiText, useTranslation } from "@/i18n";
+
 
 import { useState } from "react";
 import { TransitionTopIcon } from "@hugeicons/core-free-icons";
@@ -33,6 +35,8 @@ import {
 	SectionTitle,
 } from "@/components/section";
 import { useEditor } from "@/editor/use-editor";
+import { FPS_PRESETS } from "@/fps/presets";
+import { floatToFrameRate } from "@/fps/utils";
 import { DEFAULT_EXPORT_OPTIONS } from "@/export/defaults";
 
 function isExportFormat(value: string): value is ExportFormat {
@@ -80,7 +84,7 @@ export function ExportButton() {
 				>
 					<div className="relative flex items-center gap-1.5 rounded-[0.6rem] bg-linear-270 from-[#2567EC] to-[#37B6F7] px-4 py-1 shadow-[0_1px_3px_0px_rgba(0,0,0,0.65)]">
 						<HugeiconsIcon icon={TransitionTopIcon} className="z-50 size-3.5" />
-						<span className="z-50 text-[0.875rem]">Export</span>
+						<span className="z-50 text-[0.875rem]"><UiText text="Export" /></span>
 						<div className="absolute top-0 left-0 z-10 flex size-full items-center justify-center rounded-[0.6rem] bg-linear-to-t from-white/0 to-white/50">
 							<div className="absolute top-[0.08rem] z-50 h-[calc(100%-2px)] w-[calc(100%-2px)] rounded-[0.6rem] bg-linear-270 from-[#2567EC] to-[#37B6F7]"></div>
 						</div>
@@ -97,10 +101,12 @@ function ExportPopover({
 }: {
 	onOpenChange: (open: boolean) => void;
 }) {
+	const t = useTranslation();
 	const editor = useEditor();
 	const activeProject = useEditor((e) => e.project.getActive());
 	const exportState = useEditor((e) => e.project.getExportState());
 	const { isExporting, progress, result: exportResult } = exportState;
+	const [exportFps, setExportFps] = useState("project");
 	const [format, setFormat] = useState<ExportFormat>(
 		DEFAULT_EXPORT_OPTIONS.format,
 	);
@@ -118,7 +124,7 @@ function ExportPopover({
 			options: {
 				format,
 				quality,
-				fps: activeProject.settings.fps,
+				fps: exportFps === "project" ? activeProject.settings.fps : floatToFrameRate(Number(exportFps)),
 				includeAudio: shouldIncludeAudio,
 			},
 		});
@@ -155,11 +161,16 @@ function ExportPopover({
 				<>
 					<div className="flex items-center justify-between p-3 border-b">
 						<h3 className="font-medium text-sm">
-							{isExporting ? "Exporting project" : "Export project"}
+							{t(isExporting ? "Exporting project" : "Export project")}
 						</h3>
 					</div>
 
 					<div className="flex flex-col gap-4">
+						{!isExporting && <div className="px-3 pt-3 space-y-2 text-sm">
+							<p>{activeProject.settings.canvasSize.width} × {activeProject.settings.canvasSize.height} · {format === "mp4" ? "MP4 · H.264 / AAC" : "WebM · VP9 / Opus"}</p>
+							<label htmlFor="export-fps"><UiText text="Frame rate" /></label>
+							<select id="export-fps" className="w-full border rounded bg-background p-2" value={exportFps} onChange={(event) => setExportFps(event.target.value)}><option value="project">{t("Use project frame rate")}</option>{FPS_PRESETS.map((preset) => <option key={preset.value} value={preset.value}>{preset.label}</option>)}</select>
+						</div>}
 						{!isExporting && (
 							<>
 								<div className="flex flex-col">
@@ -169,7 +180,7 @@ function ExportPopover({
 										showTopBorder={false}
 									>
 										<SectionHeader>
-											<SectionTitle>Format</SectionTitle>
+											<SectionTitle><UiText text="Format" /></SectionTitle>
 										</SectionHeader>
 										<SectionContent>
 											<RadioGroup
@@ -183,14 +194,12 @@ function ExportPopover({
 												<div className="flex items-center space-x-2">
 													<RadioGroupItem value="mp4" id="mp4" />
 													<Label htmlFor="mp4">
-														MP4 (H.264) - Better compatibility
-													</Label>
+														<UiText text="MP4 (H.264) - Better compatibility" /></Label>
 												</div>
 												<div className="flex items-center space-x-2">
 													<RadioGroupItem value="webm" id="webm" />
 													<Label htmlFor="webm">
-														WebM (VP9) - Smaller file size
-													</Label>
+														<UiText text="WebM (VP9) - Smaller file size" /></Label>
 												</div>
 											</RadioGroup>
 										</SectionContent>
@@ -198,7 +207,7 @@ function ExportPopover({
 
 									<Section collapsible defaultOpen={false}>
 										<SectionHeader>
-											<SectionTitle>Quality</SectionTitle>
+											<SectionTitle><UiText text="Quality" /></SectionTitle>
 										</SectionHeader>
 										<SectionContent>
 											<RadioGroup
@@ -211,21 +220,20 @@ function ExportPopover({
 											>
 												<div className="flex items-center space-x-2">
 													<RadioGroupItem value="low" id="low" />
-													<Label htmlFor="low">Low - Smallest file size</Label>
+													<Label htmlFor="low"><UiText text="Low - Smallest file size" /></Label>
 												</div>
 												<div className="flex items-center space-x-2">
 													<RadioGroupItem value="medium" id="medium" />
-													<Label htmlFor="medium">Medium - Balanced</Label>
+													<Label htmlFor="medium"><UiText text="Medium - Balanced" /></Label>
 												</div>
 												<div className="flex items-center space-x-2">
 													<RadioGroupItem value="high" id="high" />
-													<Label htmlFor="high">High - Recommended</Label>
+													<Label htmlFor="high"><UiText text="High - Recommended" /></Label>
 												</div>
 												<div className="flex items-center space-x-2">
 													<RadioGroupItem value="very_high" id="very_high" />
 													<Label htmlFor="very_high">
-														Very high - Largest file size
-													</Label>
+														<UiText text="Very high - Largest file size" /></Label>
 												</div>
 											</RadioGroup>
 										</SectionContent>
@@ -233,7 +241,7 @@ function ExportPopover({
 
 									<Section collapsible defaultOpen={false}>
 										<SectionHeader>
-											<SectionTitle>Audio</SectionTitle>
+											<SectionTitle><UiText text="Audio" /></SectionTitle>
 										</SectionHeader>
 										<SectionContent>
 											<div className="flex items-center space-x-2">
@@ -245,8 +253,7 @@ function ExportPopover({
 													}
 												/>
 												<Label htmlFor="include-audio">
-													Include audio in export
-												</Label>
+													<UiText text="Include audio in export" /></Label>
 											</div>
 										</SectionContent>
 									</Section>
@@ -255,8 +262,7 @@ function ExportPopover({
 								<div className="p-3 pt-0">
 									<Button onClick={handleExport} className="w-full gap-2">
 										<Download className="size-4" />
-										Export
-									</Button>
+										<UiText text="Export" /></Button>
 								</div>
 							</>
 						)}
@@ -278,8 +284,7 @@ function ExportPopover({
 									className="w-full rounded-md"
 									onClick={handleCancel}
 								>
-									Cancel
-								</Button>
+									<UiText text="Cancel" /></Button>
 							</div>
 						)}
 					</div>
@@ -307,8 +312,8 @@ function ExportError({
 	return (
 		<div className="space-y-4 p-3">
 			<div className="flex flex-col gap-1.5">
-				<p className="text-destructive text-sm font-medium">Export failed</p>
-				<p className="text-muted-foreground text-xs">{error}</p>
+				<p className="text-destructive text-sm font-medium"><UiText text="Export failed" /></p>
+				<p className="text-muted-foreground text-xs"><UiText text={error} /></p>
 			</div>
 
 			<div className="flex gap-2">
@@ -319,8 +324,7 @@ function ExportError({
 					onClick={handleCopy}
 				>
 					{copied ? <Check className="text-constructive" /> : <Copy />}
-					Copy
-				</Button>
+					<UiText text="Copy" /></Button>
 				<Button
 					variant="outline"
 					size="sm"
@@ -328,8 +332,7 @@ function ExportError({
 					onClick={onRetry}
 				>
 					<RotateCcw />
-					Retry
-				</Button>
+					<UiText text="Retry" /></Button>
 			</div>
 		</div>
 	);

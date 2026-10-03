@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/i18n";
+
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -110,7 +112,7 @@ export function ShortcutsDialog({
 		<Dialog open={isOpen} onOpenChange={onOpenChange}>
 			<DialogContent className="flex max-h-[80vh] max-w-2xl flex-col p-0">
 				<DialogHeader>
-					<DialogTitle>Keyboard shortcuts</DialogTitle>
+					<DialogTitle><UiText text="Keyboard shortcuts" /></DialogTitle>
 				</DialogHeader>
 
 				<DialogBody className="scrollbar-thin grow overflow-y-auto">
@@ -140,8 +142,7 @@ export function ShortcutsDialog({
 				</DialogBody>
 				<DialogFooter>
 					<Button variant="destructive" onClick={resetToDefaults}>
-						Reset to default
-					</Button>
+						<UiText text="Reset to default" /></Button>
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>
@@ -173,7 +174,7 @@ function ShortcutItem({
 				{shortcut.icon && (
 					<div className="text-muted-foreground">{shortcut.icon}</div>
 				)}
-				<span className="text-sm">{shortcut.description}</span>
+				<span className="text-sm"><UiText text={shortcut.description} /></span>
 			</div>
 			<div className="flex items-center gap-2">
 				{displayKeys.map((key: string, index: number) => (

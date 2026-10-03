@@ -1,3 +1,5 @@
+"use client";
+import { useTranslation } from "@/i18n";
 import * as React from "react";
 import { Slot as SlotPrimitive } from "radix-ui";
 import { cva, type VariantProps } from "class-variance-authority";
@@ -45,6 +47,7 @@ export interface ButtonProps
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 	({ className, variant, size, asChild = false, ...props }, ref) => {
+		const t = useTranslation();
 		const Comp = asChild ? SlotPrimitive.Slot : "button";
 		const effectiveSize = size ?? (variant === "text" ? "text" : "default");
 		return (
@@ -55,6 +58,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 				ref={ref}
 				type="button"
 				{...props}
+				aria-label={props["aria-label"] ? t(props["aria-label"]) : undefined}
+				title={props.title ? t(props.title) : undefined}
 			/>
 		);
 	},

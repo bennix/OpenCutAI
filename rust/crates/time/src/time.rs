@@ -1,3 +1,5 @@
+mod audio_envelope;
+pub use audio_envelope::audio_fade_gain;
 mod frame_rate;
 mod media_time;
 mod timecode;

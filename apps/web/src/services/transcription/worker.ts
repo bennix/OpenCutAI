@@ -1,4 +1,5 @@
 import {
+	env,
 	pipeline,
 	type AutomaticSpeechRecognitionPipeline,
 	type AutomaticSpeechRecognitionOutput,
@@ -10,7 +11,7 @@ import {
 } from "@/transcription/audio";
 
 export type WorkerMessage =
-	| { type: "init"; modelId: string }
+	| { type: "init"; modelId: string; dtype: "q4" | "q8" }
 	| { type: "transcribe"; audio: Float32Array; language: string }
 	| { type: "cancel" };
 
@@ -27,6 +28,9 @@ export type WorkerResponse =
 	| { type: "transcribe-error"; error: string }
 	| { type: "cancelled" };
 
+env.useBrowserCache = true;
+env.allowLocalModels = false;
+
 let transcriber: AutomaticSpeechRecognitionPipeline | null = null;
 let cancelled = false;
 let lastReportedProgress = -1;
@@ -37,7 +41,7 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
 
 	switch (message.type) {
 		case "init":
-			await handleInit({ modelId: message.modelId });
+			await handleInit({ modelId: message.modelId, dtype: message.dtype });
 			break;
 		case "transcribe":
 			await handleTranscribe({
@@ -52,14 +56,14 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
 	}
 };
 
-async function handleInit({ modelId }: { modelId: string }) {
+async function handleInit({ modelId, dtype }: { modelId: string; dtype: "q4" | "q8" }) {
 	lastReportedProgress = -1;
 	fileBytes.clear();
 
 	try {
 		transcriber = (await pipeline("automatic-speech-recognition", modelId, {
-			dtype: "q4",
-			device: "auto",
+			dtype,
+			device: "wasm",
 			progress_callback: (progressInfo: {
 				status?: string;
 				file?: string;

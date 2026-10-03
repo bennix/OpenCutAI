@@ -1,0 +1,80 @@
+{
+  "appId": "app.opencut.ai.desktop",
+  "productName": "OpenCut AI",
+  "directories": {
+    "app": "apps/electron",
+    "output": "dist-desktop"
+  },
+  "files": [
+    "main.cjs",
+    "package.json",
+    "preload.cjs",
+    "recording-controls*",
+    "assets/app.icns",
+    "!**/node_modules/**/*",
+    "assets/app.png",
+    "assets/app.ico"
+  ],
+  "extraResources": [
+    {
+      "from": "apps/electron/web.tar.gz",
+      "to": "web.tar.gz"
+    },
+    {
+      "from": "apps/electron/web-build.json",
+      "to": "web-build.json"
+    }
+  ],
+  "mac": {
+    "target": [
+      "dir",
+      "dmg"
+    ],
+    "category": "public.app-category.video",
+    "identity": "ZHIPING XU (5N66S29EK2)",
+    "extendInfo": {
+      "NSMicrophoneUsageDescription": "Record your microphone as a separate editing audio track when you enable microphone recording.",
+      "NSAudioCaptureUsageDescription": "Record system audio as a separate editing audio track when you enable system sound recording."
+    },
+    "icon": "apps/electron/assets/app.icns",
+    "hardenedRuntime": true,
+    "notarize": false,
+    "signIgnore": [
+      "\\.pak$",
+      "\\.bin$",
+      "\\.dat$",
+      "\\.asar$",
+      "\\.tar\\.gz$",
+      "\\.icns$",
+      "\\.png$"
+    ]
+  },
+  "npmRebuild": false,
+  "dmg": {
+    "sign": true,
+    "title": "OpenCut AI",
+    "artifactName": "OpenCut-AI-${version}-${arch}.dmg"
+  },
+  "win": {
+    "target": [
+      "nsis"
+    ],
+    "icon": "apps/electron/assets/app.ico",
+    "artifactName": "OpenCut-AI-${version}-${arch}-Setup.exe"
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true
+  },
+  "linux": {
+    "target": [
+      "deb",
+      "rpm"
+    ],
+    "icon": "apps/electron/assets/app.png",
+    "category": "AudioVideo",
+    "maintainer": "bennix <zpxu@fudan.edu.cn>",
+    "artifactName": "OpenCut-AI-${version}-${arch}.${ext}"
+  }
+}

@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/i18n";
+
 
 import { useState, useMemo, useRef, useEffect, useCallback, type CSSProperties } from "react";
 import { List, type RowComponentProps } from "react-window";
@@ -146,25 +148,21 @@ export function FontPicker({
 				</div>
 				{status === "loading" && (
 					<div className="py-8 text-center text-sm text-muted-foreground">
-						Loading fonts...
-					</div>
+						<UiText text="Loading fonts..." /></div>
 				)}
 				{status === "error" && (
 					<div className="flex flex-col items-center gap-3 py-8 px-4">
 						<p className="text-sm text-muted-foreground text-center">
-							Failed to load font previews.
-						</p>
+							<UiText text="Failed to load font previews." /></p>
 						<Button variant="outline" size="sm" onClick={handleRetry}>
-							Retry
-						</Button>
+							<UiText text="Retry" /></Button>
 					</div>
 				)}
 				{status === "idle" &&
 					fontNames.length > 0 &&
 					filteredFonts.length === 0 && (
 						<div className="py-6 text-center text-sm text-muted-foreground">
-							No fonts found.
-						</div>
+							<UiText text="No fonts found." /></div>
 					)}
 				{status === "idle" && atlas && filteredFonts.length > 0 && (
 					<List

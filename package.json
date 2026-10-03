@@ -7,11 +7,11 @@
   ],
   "scripts": {
     "build:tools": "turbo run build --filter=@opencut/tools",
-    "build:wasm": "wasm-pack build rust/wasm --target bundler --out-dir pkg",
+    "build:wasm": "bun x wasm-pack@0.15.0 build rust/wasm --target bundler --out-dir ../../packages/wasm",
     "build:web": "turbo run build --filter=@opencut/web",
     "deploy:web": "turbo run deploy --filter=@opencut/web",
     "dev:tools": "turbo run dev --filter=@opencut/tools",
-    "dev:wasm": "cargo watch -w rust/crates -w rust/wasm/src -s 'wasm-pack build rust/wasm --target bundler --out-dir pkg'",
+    "dev:wasm": "cargo watch -w rust/crates -w rust/wasm/src -s 'bun x wasm-pack@0.15.0 build rust/wasm --target bundler --out-dir ../../packages/wasm'",
     "dev:web": "turbo run dev --filter=@opencut/web",
     "format:web": "prettier apps/web/src/services/renderer --write",
     "generate:fonts": "npx tsx apps/web/scripts/generate-font-sprites.ts",
@@ -20,7 +20,12 @@
     "preview:web": "turbo run preview --filter=@opencut/web",
     "publish:wasm": "bun run build:wasm && npm publish rust/wasm/pkg --access public",
     "start:tools": "turbo run start --filter=@opencut/tools",
-    "test": "bun test"
+    "test": "bun test",
+    "build:ai": "bun run scripts/build-ai.ts",
+    "mcp": "bun run scripts/mcp.ts",
+    "test:ai": "cargo test -p opencut-ai && bun test apps/web/src/ai/__tests__ scripts/mcp.test.ts",
+    "dev:desktop": "electron apps/electron",
+    "package:desktop": "bun run scripts/package-desktop.ts"
   },
   "dependencies": {
     "@types/react": "^19.2.10",
@@ -28,21 +33,27 @@
     "better-auth": "^1.4.15",
     "next": "^16.1.3",
     "opencut": ".",
-    "opencut-wasm": "^0.2.10"
+    "opencut-wasm": "workspace:*"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
+    "@modelcontextprotocol/sdk": "^1.31.0",
     "@next/eslint-plugin-next": "^16.2.4",
+    "@types/bun": "^1.4.2",
+    "electron": "^44.5.1",
+    "electron-builder": "^26.15.3",
     "eslint": "^9.39.4",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
+    "fake-indexeddb": "^6.2.5",
     "globals": "^17.5.0",
     "prettier": "^3.8.3",
     "turbo": "^2.8.20",
     "typescript": "^6.0.2",
-    "typescript-eslint": "^8.59.0"
+    "typescript-eslint": "^8.59.0",
+    "zod": "^4.6.5"
   },
   "trustedDependencies": [
     "@tailwindcss/oxide"

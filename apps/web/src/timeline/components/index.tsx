@@ -1,4 +1,9 @@
 "use client";
+import { getTimelineRows } from "@/timeline/track-style";
+import { TrackPropertiesDialog } from "./track-properties-dialog";
+import { Settings2, Trash2 } from "lucide-react";
+import { UiText, useTranslation } from "@/i18n";
+
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -115,6 +120,7 @@ const TRACK_ICONS: Record<TimelineTrack["type"], ReactNode> = {
 };
 
 export function Timeline() {
+	const t = useTranslation();
 	const snappingEnabled = useTimelineStore((s) => s.snappingEnabled);
 	const {
 		selectedElements,
@@ -130,7 +136,7 @@ export function Timeline() {
 	const tracks = useMemo<TimelineTrack[]>(
 		() =>
 			scene
-				? [...scene.tracks.overlay, scene.tracks.main, ...scene.tracks.audio]
+				? getTimelineRows(scene.tracks)
 				: [],
 		[scene],
 	);
@@ -434,7 +440,7 @@ export function Timeline() {
 				"panel bg-background relative flex h-full flex-col overflow-hidden rounded-sm border"
 			}
 			{...dragProps}
-			aria-label="Timeline"
+			aria-label={t("Timeline")}
 		>
 			<TimelineToolbar
 				zoomLevel={zoomLevel}
@@ -612,10 +618,12 @@ function TrackLabelsPanel({
 }) {
 	const editor = useEditor();
 	const scene = useEditor((e) => e.scenes.getActiveSceneOrNull());
+	const t = useTranslation();
+	const [propertiesTrackId, setPropertiesTrackId] = useState<string | null>(null);
 	const tracks = useMemo<TimelineTrack[]>(
 		() =>
 			scene
-				? [...scene.tracks.overlay, scene.tracks.main, ...scene.tracks.audio]
+				? getTimelineRows(scene.tracks)
 				: [],
 		[scene],
 	);
@@ -667,7 +675,7 @@ function TrackLabelsPanel({
 										}}
 									>
 										<div
-											className="flex shrink-0 items-center justify-end gap-2 px-3"
+											className="flex shrink-0 items-center justify-end gap-1 px-2"
 											style={{ height: `${baseHeight}px` }}
 										>
 											{canTrackHaveAudio(track) && (
@@ -698,6 +706,8 @@ function TrackLabelsPanel({
 													}
 												/>
 											)}
+											<button type="button" className="flex size-6 items-center justify-center rounded hover:bg-accent" title={t("Track properties")} aria-label={`${t("Track properties")}: ${track.name}`} onClick={() => { editor.timeline.commitPreview(); setPropertiesTrackId(track.id); }}><Settings2 className="size-4" /></button>
+											<button type="button" className="flex size-6 items-center justify-center rounded hover:bg-destructive/10 hover:text-destructive" title={t("Delete track")} aria-label={`${t("Delete track")}: ${track.name}`} onClick={() => editor.timeline.removeTrack({ trackId: track.id })}><Trash2 className="size-4" /></button>
 											<TrackIcon track={track} />
 										</div>
 										{expandedRows.length > 0 && (
@@ -710,6 +720,7 @@ function TrackLabelsPanel({
 					)}
 				</div>
 			</div>
+			{propertiesTrackId && tracks.find(track => track.id === propertiesTrackId) && <TrackPropertiesDialog key={propertiesTrackId} track={tracks.find(track => track.id === propertiesTrackId)!} onClose={() => setPropertiesTrackId(null)} />}
 			<div
 				className="bg-background shrink-0"
 				style={{
@@ -756,7 +767,7 @@ function TimelineTrackRows({
 	const tracks = useMemo<TimelineTrack[]>(
 		() =>
 			scene
-				? [...scene.tracks.overlay, scene.tracks.main, ...scene.tracks.audio]
+				? getTimelineRows(scene.tracks)
 				: [],
 		[scene],
 	);
@@ -843,8 +854,7 @@ function TimelineTrackRows({
 								invokeAction("paste-copied");
 							}}
 						>
-							Paste elements
-						</ContextMenuItem>
+							<UiText text="Paste elements" /></ContextMenuItem>
 						<ContextMenuItem
 							icon={<HugeiconsIcon icon={VolumeHighIcon} />}
 							onClick={(event: React.MouseEvent) => {
@@ -867,7 +877,7 @@ function TimelineTrackRows({
 								? "Show track"
 								: "Hide track"}
 						</ContextMenuItem>
-						{track.id !== mainTrackId && (
+						{(
 							<ContextMenuItem
 								icon={<HugeiconsIcon icon={Delete02Icon} />}
 								onClick={(event: React.MouseEvent) => {
@@ -876,8 +886,7 @@ function TimelineTrackRows({
 								}}
 								variant="destructive"
 							>
-								Delete track
-							</ContextMenuItem>
+								<UiText text="Delete track" /></ContextMenuItem>
 						)}
 					</ContextMenuContent>
 				</ContextMenu>

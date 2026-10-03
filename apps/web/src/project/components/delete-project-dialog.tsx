@@ -1,3 +1,5 @@
+
+import { UiText } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -51,17 +53,14 @@ export function DeleteProjectDialog({
 				</DialogHeader>
 				<DialogBody>
 					<Alert variant="destructive">
-						<AlertTitle>Warning</AlertTitle>
+						<AlertTitle><UiText text="Warning" /></AlertTitle>
 						<AlertDescription>
-							This will permanently delete{" "}
-							{singleName ? `"${singleName}"` : `${count} projects`} and all
-							associated files.
-						</AlertDescription>
+							<UiText text="This will permanently delete" />{" "}
+							{singleName ? `"${singleName}"` : `${count} projects`} <UiText text="and all associated files." /></AlertDescription>
 					</Alert>
 					<div className="flex flex-col gap-3">
 						<Label className="text-xs font-semibold text-slate-500">
-							Type "DELETE" to confirm
-						</Label>
+							<UiText text={'Type "DELETE" to confirm'} /></Label>
 						<Input
 							type="text"
 							placeholder="DELETE"
@@ -72,11 +71,9 @@ export function DeleteProjectDialog({
 				</DialogBody>
 				<DialogFooter>
 					<Button variant="outline" onClick={() => onOpenChange(false)}>
-						Cancel
-					</Button>
+						<UiText text="Cancel" /></Button>
 					<Button variant="destructive" onClick={onConfirm}>
-						Delete project
-					</Button>
+						<UiText text="Delete project" /></Button>
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>

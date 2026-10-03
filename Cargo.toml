@@ -1,6 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
+    "rust/crates/ai",
     "apps/desktop",
     "rust/crates/time",
     "rust/crates/bridge",

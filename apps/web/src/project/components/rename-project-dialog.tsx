@@ -1,3 +1,5 @@
+
+import { UiText } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -35,11 +37,11 @@ export function RenameProjectDialog({
 		<Dialog open={isOpen} onOpenChange={handleOpenChange}>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Rename project</DialogTitle>
+					<DialogTitle><UiText text="Rename project" /></DialogTitle>
 				</DialogHeader>
 
 				<DialogBody className="gap-3">
-					<Label>New name</Label>
+					<Label><UiText text="New name" /></Label>
 					<Input
 						value={name}
 						onChange={(e) => setName(e.target.value)}
@@ -62,9 +64,8 @@ export function RenameProjectDialog({
 							onOpenChange(false);
 						}}
 					>
-						Cancel
-					</Button>
-					<Button onClick={() => onConfirm(name)}>Rename</Button>
+						<UiText text="Cancel" /></Button>
+					<Button onClick={() => onConfirm(name)}><UiText text="Rename" /></Button>
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>

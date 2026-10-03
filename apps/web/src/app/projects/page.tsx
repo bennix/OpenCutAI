@@ -1,4 +1,6 @@
 "use client";
+import { UiText, useTranslation, localize, useLocale } from "@/i18n";
+
 
 import Image from "next/image";
 import Link from "next/link";
@@ -149,15 +151,13 @@ function ProjectsHeader() {
 							<BreadcrumbItem>
 								<BreadcrumbLink asChild>
 									<Link href="/" className="text-sm sm:text-base">
-										Home
-									</Link>
+										<UiText text="Home" /></Link>
 								</BreadcrumbLink>
 							</BreadcrumbItem>
 							<BreadcrumbSeparator />
 							<BreadcrumbItem>
 								<BreadcrumbPage className="text-sm sm:text-base font-medium">
-									All projects
-								</BreadcrumbPage>
+									<UiText text="All projects" /></BreadcrumbPage>
 							</BreadcrumbItem>
 						</BreadcrumbList>
 					</Breadcrumb>
@@ -243,15 +243,14 @@ function ProjectsToolbar({ projectIds }: { projectIds: string[] }) {
 						}
 					/>
 					<span className="text-muted-foreground hidden md:block">
-						Select all
-					</span>
+						<UiText text="Select all" /></span>
 				</Label>
 
 				<div className="h-4 w-px bg-border/50" />
 
 				<SortDropdown>
 					<Button variant="text" className="text-muted-foreground pl-2">
-						{SORT_LABELS[sortKey]}
+						<UiText text={SORT_LABELS[sortKey]} />
 					</Button>
 				</SortDropdown>
 				<Button
@@ -309,6 +308,7 @@ function SearchBar({
 	className?: string;
 	collapsed?: boolean;
 }) {
+	const t = useTranslation();
 	const { searchQuery, setSearchQuery } = useProjectsStore();
 
 	return (
@@ -331,7 +331,7 @@ function SearchBar({
 						aria-hidden="true"
 					/>
 					<Input
-						placeholder="Search..."
+						placeholder={t("Search...")}
 						value={searchQuery}
 						onChange={(event) => setSearchQuery({ query: event.target.value })}
 						size="lg"
@@ -451,7 +451,7 @@ function ProjectActions() {
 								onClick={actionHandlers[action.id]}
 							>
 								<HugeiconsIcon icon={action.icon} />
-								{action.label}
+								<UiText text={action.label} />
 							</DropdownMenuItem>
 						))}
 					</DropdownMenuContent>
@@ -479,26 +479,22 @@ function SortDropdown({ children }: { children: React.ReactNode }) {
 					checked={sortKey === "createdAt"}
 					onCheckedChange={() => setSortKey({ sortKey: "createdAt" })}
 				>
-					Created
-				</DropdownMenuCheckboxItem>
+					<UiText text="Created" /></DropdownMenuCheckboxItem>
 				<DropdownMenuCheckboxItem
 					checked={sortKey === "updatedAt"}
 					onCheckedChange={() => setSortKey({ sortKey: "updatedAt" })}
 				>
-					Modified
-				</DropdownMenuCheckboxItem>
+					<UiText text="Modified" /></DropdownMenuCheckboxItem>
 				<DropdownMenuCheckboxItem
 					checked={sortKey === "name"}
 					onCheckedChange={() => setSortKey({ sortKey: "name" })}
 				>
-					Name
-				</DropdownMenuCheckboxItem>
+					<UiText text="Name" /></DropdownMenuCheckboxItem>
 				<DropdownMenuCheckboxItem
 					checked={sortKey === "duration"}
 					onCheckedChange={() => setSortKey({ sortKey: "duration" })}
 				>
-					Duration
-				</DropdownMenuCheckboxItem>
+					<UiText text="Duration" /></DropdownMenuCheckboxItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);
@@ -510,7 +506,7 @@ function NewProjectButton() {
 
 	const handleCreateProject = async () => {
 		const projectId = await editor.project.createNewProject({
-			name: "New project",
+			name: localize("New project"),
 		});
 		router.push(`/editor/${projectId}`);
 	};
@@ -521,8 +517,8 @@ function NewProjectButton() {
 			className="flex px-5 md:px-6"
 			onClick={handleCreateProject}
 		>
-			<span className="text-sm font-medium hidden md:block">New project</span>
-			<span className="text-sm font-medium block md:hidden">New</span>
+			<span className="text-sm font-medium hidden md:block"><UiText text="New project" /></span>
+			<span className="text-sm font-medium block md:hidden"><UiText text="New" /></span>
 		</Button>
 	);
 }
@@ -534,6 +530,8 @@ function ProjectItem({
 	project: TProjectMetadata;
 	allProjectIds: string[];
 }) {
+	const locale = useLocale();
+	const t = useTranslation();
 	const {
 		selectedProjectIds,
 		viewMode,
@@ -584,7 +582,7 @@ function ProjectItem({
 					{project.thumbnail ? (
 						<Image
 							src={project.thumbnail}
-							alt="Project thumbnail"
+							alt={t("Project thumbnail")}
 							fill
 							className="object-cover"
 						/>
@@ -608,7 +606,7 @@ function ProjectItem({
 				</h3>
 				<div className="text-muted-foreground flex items-center gap-1.5 text-sm">
 					<HugeiconsIcon icon={Calendar04Icon} className="size-4" />
-					<span>Created {formatDate({ date: project.createdAt })}</span>
+					<span><UiText text="Created" />{formatDate({ date: project.createdAt, locale })}</span>
 				</div>
 			</CardContent>
 		</Card>
@@ -620,7 +618,7 @@ function ProjectItem({
 				{project.thumbnail ? (
 					<Image
 						src={project.thumbnail}
-						alt="Project thumbnail"
+						alt={t("Project thumbnail")}
 						fill
 						className="object-cover"
 					/>
@@ -640,7 +638,7 @@ function ProjectItem({
 			</span>
 
 			<span className="text-muted-foreground text-sm shrink-0 w-auto pl-8 text-right hidden xs:block">
-				{formatDate({ date: project.createdAt })}
+				{formatDate({ date: project.createdAt, locale })}
 			</span>
 		</div>
 	);
@@ -777,14 +775,12 @@ function ProjectContextMenuContent({
 				icon={<HugeiconsIcon icon={Edit03Icon} />}
 				onClick={onRenameClick}
 			>
-				Rename
-			</ContextMenuItem>
+				<UiText text="Rename" /></ContextMenuItem>
 			<ContextMenuItem
 				icon={<HugeiconsIcon icon={Copy01Icon} />}
 				onClick={onDuplicateClick}
 			>
-				Duplicate
-			</ContextMenuItem>
+				<UiText text="Duplicate" /></ContextMenuItem>
 			<ContextMenuItem
 				icon={<HugeiconsIcon icon={InformationCircleIcon} />}
 				onClick={onInfoClick}
@@ -797,8 +793,7 @@ function ProjectContextMenuContent({
 				icon={<HugeiconsIcon icon={Delete02Icon} />}
 				onClick={onDeleteClick}
 			>
-				Delete
-			</ContextMenuItem>
+				<UiText text="Delete" /></ContextMenuItem>
 		</ContextMenuContent>
 	);
 }
@@ -820,6 +815,7 @@ function ProjectMenu({
 	onDeleteClick: () => void;
 	onInfoClick: () => void;
 }) {
+	const t = useTranslation();
 	const handleMenuClick = ({
 		event,
 	}: {
@@ -874,7 +870,7 @@ function ProjectMenu({
 							: "!bg-transparent !shadow-none"
 					}
 					size="icon"
-					aria-label="Project menu"
+					aria-label={t("Project menu")}
 					onClick={(event) =>
 						handleMenuClick({
 							event: event as unknown as MouseEvent<HTMLButtonElement>,
@@ -897,20 +893,17 @@ function ProjectMenu({
 			<DropdownMenuContent className="w-48" align="end">
 				<DropdownMenuItem onClick={handleRename}>
 					<HugeiconsIcon icon={Edit03Icon} />
-					Rename
-				</DropdownMenuItem>
+					<UiText text="Rename" /></DropdownMenuItem>
 				<DropdownMenuItem onClick={handleDuplicate}>
 					<HugeiconsIcon icon={Copy01Icon} />
-					Duplicate
-				</DropdownMenuItem>
+					<UiText text="Duplicate" /></DropdownMenuItem>
 				<DropdownMenuItem onClick={handleInfoClick}>
 					<HugeiconsIcon icon={InformationCircleIcon} />
 					Info
 				</DropdownMenuItem>
 				<DropdownMenuItem variant="destructive" onClick={handleDeleteClick}>
 					<HugeiconsIcon icon={Delete02Icon} />
-					Delete
-				</DropdownMenuItem>
+					<UiText text="Delete" /></DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);
@@ -956,7 +949,7 @@ function EmptyState() {
 	const handleCreateProject = async () => {
 		try {
 			const projectId = await editor.project.createNewProject({
-				name: "New project",
+				name: localize("New project"),
 			});
 			router.push(`/editor/${projectId}`);
 		} catch (error) {
@@ -976,7 +969,7 @@ function EmptyState() {
 						className="text-muted-foreground size-16 bg-accent/35 border rounded-md p-4"
 					/>
 					<div className="flex flex-col items-center gap-3">
-						<h3 className="text-lg font-medium">No results found</h3>
+						<h3 className="text-lg font-medium"><UiText text="No results found" /></h3>
 						<p className="text-muted-foreground max-w-md">
 							Your search for "{searchQuery}" did not return any results.
 						</p>
@@ -987,8 +980,7 @@ function EmptyState() {
 					variant="outline"
 					size="lg"
 				>
-					Clear search
-				</Button>
+					<UiText text="Clear search" /></Button>
 			</div>
 		);
 	}
@@ -1002,16 +994,13 @@ function EmptyState() {
 						className="text-muted-foreground size-8"
 					/>
 				</div>
-				<h3 className="text-lg font-medium">No projects yet</h3>
+				<h3 className="text-lg font-medium"><UiText text="No projects yet" /></h3>
 				<p className="text-muted-foreground max-w-md">
-					Start creating your first project. Import media, edit, and export your
-					videos. All privately.
-				</p>
+					<UiText text="Start creating your first project. Import media, edit, and export your videos. All privately." /></p>
 			</div>
 			<Button size="lg" className="gap-2" onClick={handleCreateProject}>
 				<HugeiconsIcon icon={PlusSignIcon} />
-				Create your first project
-			</Button>
+				<UiText text="Create your first project" /></Button>
 		</div>
 	);
 }

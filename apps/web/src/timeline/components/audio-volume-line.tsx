@@ -1,4 +1,6 @@
 "use client";
+import { useTranslation } from "@/i18n";
+
 
 import { useCallback, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -56,6 +58,7 @@ export function AudioVolumeLine({
 	element: AudioElement;
 	trackId: string;
 }) {
+	const t = useTranslation();
 	const editor = useEditor();
 	const surfaceRef = useRef<HTMLDivElement>(null);
 	const activePointerIdRef = useRef<number | null>(null);
@@ -250,7 +253,7 @@ export function AudioVolumeLine({
 					onPointerUp={handlePointerUp}
 					onPointerCancel={handlePointerCancel}
 					onLostPointerCapture={handleLostPointerCapture}
-					title="Drag to adjust clip volume"
+					title={t("Drag to adjust clip volume")}
 				/>
 				{isDragging &&
 					tooltipClientPos &&

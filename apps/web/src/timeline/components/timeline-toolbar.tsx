@@ -1,3 +1,4 @@
+import { useTranslation } from "@/i18n";
 import { useEditor } from "@/editor/use-editor";
 import { useElementSelection } from "@/timeline/hooks/element/use-element-selection";
 import {
@@ -29,6 +30,7 @@ import { cn } from "@/utils/ui";
 import { useTimelineStore } from "@/timeline/timeline-store";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
+	MusicNote03Icon,
 	Bookmark02Icon,
 	Delete02Icon,
 	SnowIcon,
@@ -142,6 +144,7 @@ function ToolbarLeftSection() {
 	return (
 		<div className="flex items-center gap-1">
 			<TooltipProvider delayDuration={500}>
+				<ToolbarButton icon={<HugeiconsIcon icon={MusicNote03Icon} />} tooltip="Add audio track" onClick={() => editor.timeline.addTrack({ type: "audio" })} />
 				<ToolbarButton
 					icon={<HugeiconsIcon icon={ScissorIcon} />}
 					tooltip="Split element"
@@ -246,13 +249,14 @@ function ToolbarLeftSection() {
 }
 
 function SceneSelector() {
+	const t = useTranslation();
 	const editor = useEditor();
 	const currentScene = editor.scenes.getActiveScene();
 
 	return (
 		<div>
 			<SplitButton className="border-foreground/10 border">
-				<SplitButtonLeft>{currentScene?.name || "No Scene"}</SplitButtonLeft>
+				<SplitButtonLeft>{currentScene ? (currentScene.isMain && currentScene.name === "Main scene" ? t("Main scene") : currentScene.name) : t("No Scene")}</SplitButtonLeft>
 				<SplitButtonSeparator />
 				<ScenesView>
 					<SplitButtonRight onClick={() => {}}>
@@ -345,11 +349,13 @@ function ToolbarButton({
 	isActive?: boolean;
 	buttonWrapper?: (button: React.ReactElement) => React.ReactElement;
 }) {
+	const t = useTranslation();
 	const button = (
 		<Button
 			variant={isActive ? "secondary" : "text"}
 			size="icon"
 			disabled={disabled}
+			aria-label={t(tooltip)}
 			onClick={onClick ? (event) => onClick({ event }) : undefined}
 			className={cn(
 				"rounded-sm",
@@ -370,7 +376,7 @@ function ToolbarButton({
 	return (
 		<Tooltip delayDuration={200}>
 			<TooltipTrigger asChild>{trigger}</TooltipTrigger>
-			<TooltipContent>{tooltip}</TooltipContent>
+			<TooltipContent>{t(tooltip)}</TooltipContent>
 		</Tooltip>
 	);
 }

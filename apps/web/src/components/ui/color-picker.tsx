@@ -1,3 +1,5 @@
+
+import { UiText } from "@/i18n";
 import { type ComponentProps, forwardRef, useEffect, useRef, useState } from "react";
 import { cn } from "@/utils/ui";
 import { Input } from "./input";
@@ -213,11 +215,10 @@ function ColorPickerContent({
 	};
 
 	const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		setInputValue(
-			colorFormat === "hex"
-				? event.target.value.replace("#", "")
-				: event.target.value,
-		);
+		const raw = colorFormat === "hex" ? event.target.value.replace("#", "") : event.target.value;
+		setInputValue(raw);
+		const parsed = parseColorInput({ input: raw, format: colorFormat });
+		if (parsed && (colorFormat !== "hex" || /^[0-9a-fA-F]{6}$/.test(raw))) onChange?.(appendAlpha({ rgbHex: parsed, alpha }));
 	};
 
 	const commitInputValue = () => {
@@ -294,8 +295,8 @@ function ColorPickerContent({
 						<SelectValue placeholder="Select a mode" />
 					</SelectTrigger>
 					<SelectContent position="popper">
-						<SelectItem value="custom">Custom</SelectItem>
-						<SelectItem value="saved">Saved</SelectItem>
+						<SelectItem value="custom"><UiText text="Custom" /></SelectItem>
+						<SelectItem value="saved"><UiText text="Saved" /></SelectItem>
 					</SelectContent>
 				</Select>
 				<div>
@@ -456,7 +457,9 @@ const ColorPicker = forwardRef<HTMLDivElement, ColorPickerProps>(
 		};
 
 		const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-			setInputValue(event.target.value.replace("#", ""));
+			const raw = event.target.value.replace("#", "");
+			setInputValue(raw);
+			if (/^[0-9a-fA-F]{6}$/.test(raw)) onChange?.(appendAlpha({ rgbHex: raw, alpha }));
 		};
 
 		const handleInputBlur = () => commitInputValue(inputValue);

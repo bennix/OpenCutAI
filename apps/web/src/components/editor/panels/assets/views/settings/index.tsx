@@ -1,4 +1,6 @@
 "use client";
+import { UiText, useTranslation, LanguageSetting } from "@/i18n";
+import { useTheme } from "next-themes";
 
 import { useState } from "react";
 import { PanelView } from "@/components/editor/panels/assets/views/base-panel";
@@ -32,10 +34,19 @@ import { formatNumberForDisplay } from "@/utils/math";
 import { OcSquarePlusIcon } from "@/components/icons";
 import type { TCanvasSize } from "@/project/types";
 
-type SettingsView = "project-info" | "background";
+import { useAssetsPanelStore } from "@/components/editor/panels/assets/assets-panel-store";
+import { RecordingShortcutSettings } from "@/recording/shortcut-settings";
+import { AiSettingsView } from "@/ai/settings-view";
+
+type SettingsView = "project-info" | "background" | "ai" | "general";
 
 function isSettingsView(value: string): value is SettingsView {
-	return value === "project-info" || value === "background";
+	return (
+		value === "project-info" ||
+		value === "background" ||
+		value === "ai" ||
+		value === "general"
+	);
 }
 
 const PRESET_LABELS: Record<string, string> = {
@@ -97,7 +108,10 @@ function useCanvasDimensionDraft({
 }
 
 export function SettingsView() {
-	const [view, setView] = useState<SettingsView>("project-info");
+	const t = useTranslation();
+	const { theme, setTheme } = useTheme();
+	const { settingsSection: view, setSettingsSection: setView } =
+		useAssetsPanelStore();
 	const editor = useEditor();
 	const activeProject = useEditor((e) => e.project.getActive());
 	const { canvasPresets } = useEditorStore();
@@ -116,14 +130,15 @@ export function SettingsView() {
 		};
 	});
 
-	const selectedPresetId = canvasSizeMode === "preset"
-		? (presetItems.find((preset) =>
-				areCanvasSizesEqual({
-					left: preset.canvasSize,
-					right: currentCanvasSize,
-				}),
-			)?.id ?? null)
-		: null;
+	const selectedPresetId =
+		canvasSizeMode === "preset"
+			? (presetItems.find((preset) =>
+					areCanvasSizesEqual({
+						left: preset.canvasSize,
+						right: currentCanvasSize,
+					}),
+				)?.id ?? null)
+			: null;
 
 	const updateCustomCanvasSize = ({
 		canvasSize,
@@ -221,9 +236,19 @@ export function SettingsView() {
 						}
 					}}
 				>
-					<TabsList>
-						<TabsTrigger value="project-info">Project info</TabsTrigger>
-						<TabsTrigger value="background">Background</TabsTrigger>
+					<TabsList className="grid h-auto w-full grid-cols-2">
+						<TabsTrigger value="general">
+							<UiText text="Appearance & language" />
+						</TabsTrigger>
+						<TabsTrigger value="project-info">
+							<UiText text="Project info" />
+						</TabsTrigger>
+						<TabsTrigger value="background">
+							<UiText text="Background" />
+						</TabsTrigger>
+						<TabsTrigger value="ai">
+							<UiText text="AI models & API Key" />
+						</TabsTrigger>
 					</TabsList>
 				</Tabs>
 			}
@@ -232,7 +257,9 @@ export function SettingsView() {
 				<div className="flex flex-col">
 					<Section showTopBorder={false}>
 						<SectionHeader>
-							<SectionTitle className="flex-1">Name</SectionTitle>
+							<SectionTitle className="flex-1">
+								<UiText text="Name" />
+							</SectionTitle>
 							<span className="text-sm truncate">
 								{activeProject.metadata.name}
 							</span>
@@ -240,16 +267,20 @@ export function SettingsView() {
 					</Section>
 					<Section showTopBorder={false}>
 						<SectionHeader className="justify-between">
-							<SectionTitle className="flex-1">Frame rate</SectionTitle>
-					<Select
-							value={String(Math.round(frameRateToFloat(activeProject.settings.fps)))}
-							onValueChange={(value) => {
-								const fps = floatToFrameRate(parseFloat(value));
-								editor.project.updateSettings({ settings: { fps } });
-							}}
+							<SectionTitle className="flex-1">
+								<UiText text="Frame rate" />
+							</SectionTitle>
+							<Select
+								value={String(
+									Math.round(frameRateToFloat(activeProject.settings.fps)),
+								)}
+								onValueChange={(value) => {
+									const fps = floatToFrameRate(parseFloat(value));
+									editor.project.updateSettings({ settings: { fps } });
+								}}
 							>
 								<SelectTrigger className="bg-transparent border-none p-1 h-auto">
-									<SelectValue placeholder="Select a frame rate" />
+									<SelectValue placeholder={t("Select a frame rate")} />
 								</SelectTrigger>
 								<SelectContent>
 									{FPS_PRESETS.map((preset) => (
@@ -267,7 +298,9 @@ export function SettingsView() {
 						sectionKey="settings:aspect-ratio"
 					>
 						<SectionHeader>
-							<SectionTitle className="flex-1">Aspect ratio</SectionTitle>
+							<SectionTitle className="flex-1">
+								<UiText text="Aspect ratio" />
+							</SectionTitle>
 						</SectionHeader>
 						<SectionContent className="px-2 flex flex-col gap-1 pb-2">
 							{presetItems.map((preset) => (
@@ -295,7 +328,7 @@ export function SettingsView() {
 											<NumberField
 												value={widthDraft.displayValue}
 												className="w-full"
-												aria-label="Canvas width"
+												aria-label={t("Canvas width")}
 												onFocus={widthDraft.onFocus}
 												onChange={widthDraft.onChange}
 												onBlur={widthDraft.onBlur}
@@ -303,7 +336,7 @@ export function SettingsView() {
 											<NumberField
 												value={heightDraft.displayValue}
 												className="w-full"
-												aria-label="Canvas height"
+												aria-label={t("Canvas height")}
 												onFocus={heightDraft.onFocus}
 												onChange={heightDraft.onChange}
 												onBlur={heightDraft.onBlur}
@@ -317,6 +350,32 @@ export function SettingsView() {
 				</div>
 			)}
 			{view === "background" && <BackgroundContent />}
+			{view === "general" && (
+				<div className="space-y-4 p-3 text-sm">
+					<LanguageSetting />
+					<RecordingShortcutSettings />
+					<label className="block space-y-2" htmlFor="opencut-theme">
+						<UiText text="Theme" />
+						<select
+							id="opencut-theme"
+							className="w-full rounded border bg-background p-2"
+							value={theme ?? "system"}
+							onChange={(e) => setTheme(e.target.value)}
+						>
+							<option value="system">
+								<UiText text="Follow system" />
+							</option>
+							<option value="light">
+								<UiText text="Light" />
+							</option>
+							<option value="dark">
+								<UiText text="Dark" />
+							</option>
+						</select>
+					</label>
+				</div>
+			)}
+			{view === "ai" && <AiSettingsView />}
 		</PanelView>
 	);
 }
@@ -348,7 +407,9 @@ function AspectRatioItem({
 					<div className="flex items-center justify-center size-5">
 						{previewIcon}
 					</div>
-					<span className="text-sm truncate">{label}</span>
+					<span className="text-sm truncate">
+						<UiText text={label} />
+					</span>
 				</div>
 				<div>
 					{isSelected && <HugeiconsIcon icon={Tick02Icon} className="size-4" />}

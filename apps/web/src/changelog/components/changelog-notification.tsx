@@ -1,4 +1,6 @@
 "use client";
+import { useTranslation } from "@/i18n";
+
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -11,6 +13,7 @@ import type { Release } from "../utils";
 const STORAGE_KEY = "last-seen-version";
 
 export function ChangelogNotification() {
+	const t = useTranslation();
 	const [release, setRelease] = useState<Release | null>(null);
 
 	useEffect(() => {
@@ -63,7 +66,7 @@ export function ChangelogNotification() {
 					size="icon"
 					className="-mr-1 -mt-1 shrink-0"
 					onClick={() => setRelease(null)}
-					aria-label="Dismiss"
+					aria-label={t("Dismiss")}
 				>
 					<HugeiconsIcon icon={Cancel01Icon} className="size-4" />
 				</Button>

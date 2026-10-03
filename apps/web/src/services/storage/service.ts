@@ -495,6 +495,8 @@ class StorageService {
 
 			const savedSound: SavedSound = {
 				id: soundEffect.id,
+				sourceUrl: soundEffect.url,
+				licenseUrl: soundEffect.licenseUrl,
 				name: soundEffect.name,
 				username: soundEffect.username,
 				previewUrl: soundEffect.previewUrl,

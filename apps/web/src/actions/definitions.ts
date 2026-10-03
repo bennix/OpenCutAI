@@ -208,3 +208,8 @@ export function getDefaultShortcuts(): Map<
 
 	return shortcuts;
 }
+
+export function isActionWithOptionalArgs(value: unknown): value is TActionWithOptionalArgs {
+	return typeof value === "string" && Object.hasOwn(ACTIONS, value) &&
+		value !== "remove-media-asset" && value !== "remove-media-assets";
+}

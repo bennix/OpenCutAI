@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/i18n";
 import { useEffect, useRef, useState } from "react";
 import {
 	formatTimecode,
@@ -32,6 +33,7 @@ export function EditableTimecode({
 	className,
 	disabled = false,
 }: EditableTimecodeProps) {
+	const t = useTranslation();
 	const [isEditing, setIsEditing] = useState(false);
 	const [inputValue, setInputValue] = useState("");
 	const [hasError, setHasError] = useState(false);
@@ -153,7 +155,7 @@ export function EditableTimecode({
 				disabled && "cursor-default hover:bg-transparent",
 				className,
 			)}
-			title={disabled ? undefined : "Click to edit time"}
+			title={disabled ? undefined : t("Click to edit time")}
 		>
 			{formattedTime}
 		</button>

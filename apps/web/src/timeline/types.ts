@@ -34,6 +34,8 @@ interface BaseTrack {
 }
 
 export interface VideoTrack extends BaseTrack {
+	/** Keep the required main container internally after its row is deleted. */
+	removedFromTimeline?: boolean;
 	type: "video";
 	elements: (VideoElement | ImageElement)[];
 	muted: boolean;
@@ -102,7 +104,11 @@ export interface LibraryAudioElement extends BaseAudioElement {
 
 export type AudioElement = UploadAudioElement | LibraryAudioElement;
 
+export interface ClipTransition { mode: string; length: number; effect_id?: string; neighbor?: string }
+export interface ClipTransitions { entrance?: ClipTransition; exit?: ClipTransition; originalAnimations: ElementAnimations; originalEffects?: Effect[] }
+
 interface BaseTimelineElement {
+	transitions?: ClipTransitions;
 	id: string;
 	name: string;
 	duration: MediaTime;

@@ -1,24 +1,22 @@
 "use client";
+import { UiText, localize, useTranslation } from "@/i18n";
 
+import { RecordingDialog } from "@/recording/recording-dialog";
 import { Button } from "../ui/button";
 import { useRef, useState } from "react";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
-	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import Link from "next/link";
 import { RenameProjectDialog } from "@/project/components/rename-project-dialog";
 import { DeleteProjectDialog } from "@/project/components/delete-project-dialog";
 import { useRouter } from "next/navigation";
-import { FaDiscord } from "react-icons/fa6";
 import { ExportButton } from "./export-button";
 import { FeedbackPopover } from "@/feedback/components/feedback-popover";
 import { ThemeToggle } from "../theme-toggle";
 import { DEFAULT_LOGO_URL } from "@/site/brand";
-import { SOCIAL_LINKS } from "@/site/social";
 import { toast } from "sonner";
 import { useEditor } from "@/editor/use-editor";
 import { CommandIcon, Logout05Icon } from "@hugeicons/core-free-icons";
@@ -26,6 +24,8 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { ShortcutsDialog } from "@/actions/components/shortcuts-dialog";
 import Image from "next/image";
 import { cn } from "@/utils/ui";
+
+import { useAssetsPanelStore } from "@/components/editor/panels/assets/assets-panel-store";
 
 export function EditorHeader() {
 	return (
@@ -35,6 +35,14 @@ export function EditorHeader() {
 				<EditableProjectName />
 			</div>
 			<nav className="flex items-center gap-2">
+				<RecordingDialog />
+				<Button
+					variant="outline"
+					size="sm"
+					onClick={() => useAssetsPanelStore.getState().openAiSettings()}
+				>
+					<UiText text="AI settings" />
+				</Button>
 				<FeedbackPopover />
 				<ExportButton />
 				<ThemeToggle />
@@ -44,6 +52,7 @@ export function EditorHeader() {
 }
 
 function ProjectDropdown() {
+	const t = useTranslation();
 	const [openDialog, setOpenDialog] = useState<
 		"delete" | "rename" | "shortcuts" | null
 	>(null);
@@ -79,7 +88,7 @@ function ProjectDropdown() {
 					name: newName.trim(),
 				});
 			} catch (error) {
-				toast.error("Failed to rename project", {
+				toast.error(localize("Failed to rename project"), {
 					description:
 						error instanceof Error ? error.message : "Please try again",
 				});
@@ -97,7 +106,7 @@ function ProjectDropdown() {
 				});
 				router.push("/projects");
 			} catch (error) {
-				toast.error("Failed to delete project", {
+				toast.error(localize("Failed to delete project"), {
 					description:
 						error instanceof Error ? error.message : "Please try again",
 				});
@@ -114,7 +123,7 @@ function ProjectDropdown() {
 					<Button variant="ghost" size="icon" className="p-1 rounded-sm size-8">
 						<Image
 							src={DEFAULT_LOGO_URL}
-							alt="Project thumbnail"
+							alt={t("Project thumbnail")}
 							width={32}
 							height={32}
 							className="invert dark:invert-0 size-5"
@@ -127,26 +136,14 @@ function ProjectDropdown() {
 						disabled={isExiting}
 						icon={<HugeiconsIcon icon={Logout05Icon} />}
 					>
-						Exit project
+						<UiText text="Exit project" />
 					</DropdownMenuItem>
 
 					<DropdownMenuItem
 						onClick={() => setOpenDialog("shortcuts")}
 						icon={<HugeiconsIcon icon={CommandIcon} />}
 					>
-						Shortcuts
-					</DropdownMenuItem>
-
-					<DropdownMenuSeparator />
-
-					<DropdownMenuItem asChild icon={<FaDiscord className="size-4!" />}>
-						<Link
-							href={SOCIAL_LINKS.discord}
-							target="_blank"
-							rel="noopener noreferrer"
-						>
-							Discord
-						</Link>
+						<UiText text="Shortcuts" />
 					</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenu>
@@ -206,7 +203,7 @@ function EditableProjectName() {
 					name: newName,
 				});
 			} catch (error) {
-				toast.error("Failed to rename project", {
+				toast.error(localize("Failed to rename project"), {
 					description:
 						error instanceof Error ? error.message : "Please try again",
 				});

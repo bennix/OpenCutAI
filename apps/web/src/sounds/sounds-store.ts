@@ -2,9 +2,7 @@ import { create } from "zustand";
 import type { SoundEffect, SavedSound } from "@/sounds/types";
 import { storageService } from "@/services/storage/service";
 import { toast } from "sonner";
-import { EditorCore } from "@/core";
-import { buildLibraryAudioElement } from "@/timeline/element-utils";
-import { mediaTimeFromSeconds } from "@/wasm";
+import { fetchSoundFile, importSoundFiles } from "./transfer";
 
 interface SoundsStore {
 	topSoundEffects: SoundEffect[];
@@ -67,7 +65,7 @@ export const useSoundsStore = create<SoundsStore>((set, get) => ({
 	isLoading: false,
 	error: null,
 	hasLoaded: false,
-	showCommercialOnly: true,
+	showCommercialOnly: false,
 
 	toggleCommercialFilter: () => {
 		set((state) => ({ showCommercialOnly: !state.showCommercialOnly }));
@@ -207,45 +205,11 @@ export const useSoundsStore = create<SoundsStore>((set, get) => ({
 	},
 
 	addSoundToTimeline: async ({ sound }) => {
-		const audioUrl = sound.previewUrl;
-		if (!audioUrl) {
-			toast.error("Sound file not available");
-			return false;
-		}
-
 		try {
-			const editor = EditorCore.getInstance();
-			const currentTime = editor.playback.getCurrentTime();
-
-			const response = await fetch(audioUrl);
-			if (!response.ok)
-				throw new Error(`Failed to download audio: ${response.statusText}`);
-
-			const arrayBuffer = await response.arrayBuffer();
-			const audioContext = new AudioContext();
-			const buffer = await audioContext.decodeAudioData(arrayBuffer);
-
-			const element = buildLibraryAudioElement({
-				sourceUrl: audioUrl,
-				name: sound.name,
-				duration: mediaTimeFromSeconds({ seconds: sound.duration }),
-				startTime: currentTime,
-				buffer,
-			});
-
-			editor.timeline.insertElement({
-				placement: { mode: "auto", trackType: "audio" },
-				element,
-			});
+			await importSoundFiles([await fetchSoundFile(sound)], sound);
 			return true;
 		} catch (error) {
-			console.error("Failed to add sound to timeline:", error);
-			toast.error(
-				error instanceof Error
-					? error.message
-					: "Failed to add sound to timeline",
-				{ id: `sound-${sound.id}` },
-			);
+			toast.error(error instanceof Error ? error.message : "Failed to add sound to timeline");
 			return false;
 		}
 	},

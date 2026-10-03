@@ -1,4 +1,6 @@
 "use client";
+import { UiText, useTranslation } from "@/i18n";
+
 
 import type { MaskableElement } from "@/timeline";
 import type { Mask, MaskType, TextMask } from "@/masks/types";
@@ -127,6 +129,7 @@ function withPreviewedMaskParam({
 }
 
 export function MasksTab({ element, trackId }: MasksTabProps) {
+	const t = useTranslation();
 	const editor = useEditor();
 	const { renderElement, previewUpdates, commit } =
 		useElementPreview<MaskableElement>({
@@ -254,7 +257,7 @@ export function MasksTab({ element, trackId }: MasksTabProps) {
 	return (
 		<div className="flex flex-col h-full">
 			<div className="border-b px-3.5 h-11 shrink-0 flex items-center justify-between gap-2">
-				<SectionTitle>Masks</SectionTitle>
+				<SectionTitle><UiText text="Masks" /></SectionTitle>
 				<DropdownMenu
 					open={hasMask ? false : isDropdownOpen}
 					onOpenChange={handleDropdownOpenChange}
@@ -267,20 +270,18 @@ export function MasksTab({ element, trackId }: MasksTabProps) {
 										variant="ghost"
 										size="icon"
 										disabled
-										aria-label="Add mask"
+										aria-label={t("Add mask")}
 									>
 										<HugeiconsIcon icon={PlusSignIcon} className="size-3.5!" />
 									</Button>
 								</span>
 							</TooltipTrigger>
 							<TooltipContent className="max-w-56 text-balance">
-								Only one mask is supported right now. If you need more,
-								duplicate the clip and apply a different mask to each copy.
-							</TooltipContent>
+								<UiText text="Only one mask is supported right now. If you need more, duplicate the clip and apply a different mask to each copy." /></TooltipContent>
 						</Tooltip>
 					) : (
 						<DropdownMenuTrigger asChild>
-							<Button variant="ghost" size="icon" aria-label="Add mask">
+							<Button variant="ghost" size="icon" aria-label={t("Add mask")}>
 								<HugeiconsIcon icon={PlusSignIcon} className="size-3.5!" />
 							</Button>
 						</DropdownMenuTrigger>
@@ -295,7 +296,7 @@ export function MasksTab({ element, trackId }: MasksTabProps) {
 								onClick={() => commitMask({ maskType: definition.type })}
 							>
 								<HugeiconsIcon {...definition.icon} />
-								{definition.name}
+								<UiText text={definition.name} />
 							</DropdownMenuItem>
 						))}
 					</DropdownMenuContent>
@@ -373,7 +374,7 @@ function MaskItem({
 				<div className="flex items-center gap-2">
 					<HugeiconsIcon {...definition.icon} size={14} />
 					<SectionTitle className="capitalize font-normal">
-						{definition.name}
+						<UiText text={definition.name} />
 					</SectionTitle>
 				</div>
 			</SectionHeader>
@@ -839,14 +840,12 @@ function EmptyView({ onAddMask }: EmptyViewProps) {
 		<div className="flex flex-col h-full items-center justify-center gap-4 text-center">
 			<OcShapesIcon className="size-10 text-muted-foreground" strokeWidth={1} />
 			<div className="flex flex-col gap-2">
-				<h3 className="font-medium text-foreground">No masks</h3>
+				<h3 className="font-medium text-foreground"><UiText text="No masks" /></h3>
 				<p className="text-muted-foreground text-sm text-balance max-w-40">
-					Add a mask to hide or reveal parts of this layer.
-				</p>
+					<UiText text="Add a mask to hide or reveal parts of this layer." /></p>
 			</div>
 			<Button variant="default" size="sm" onClick={onAddMask}>
-				Add mask
-			</Button>
+				<UiText text="Add mask" /></Button>
 		</div>
 	);
 }

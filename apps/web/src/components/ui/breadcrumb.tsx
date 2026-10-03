@@ -1,3 +1,5 @@
+
+import { UiText } from "@/i18n";
 import { ChevronRight, MoreHorizontal } from "lucide-react";
 import { Slot } from "radix-ui";
 
@@ -90,7 +92,7 @@ function BreadcrumbEllipsis({
 			{...props}
 		>
 			<MoreHorizontal className="size-4" />
-			<span className="sr-only">More</span>
+			<span className="sr-only"><UiText text="More" /></span>
 		</span>
 	);
 }

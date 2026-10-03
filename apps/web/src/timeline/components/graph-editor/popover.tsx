@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/i18n";
+
 
 import { useState } from "react";
 import { Popover, PopoverContent } from "@/components/ui/popover";
@@ -126,11 +128,9 @@ export function GraphEditorPopover({
 				<Tabs variant="underline" defaultValue="presets" className="flex flex-col gap-2">
 					<TabsList className="px-3">
 						<TabsTrigger value="presets" className="text-xs">
-							Presets
-						</TabsTrigger>
+							<UiText text="Presets" /></TabsTrigger>
 						<TabsTrigger value="saved" className="text-xs">
-							Saved
-						</TabsTrigger>
+							<UiText text="Saved" /></TabsTrigger>
 					</TabsList>
 					<TabsContent value="presets" className="px-3 pb-0">
 						<ExpandableGrid
@@ -178,7 +178,7 @@ export function GraphEditorPopover({
 										className="size-3.5 opacity-40"
 									/>
 								</div>
-								<span className="text-[10px] leading-tight">Save</span>
+								<span className="text-[10px] leading-tight"><UiText text="Save" /></span>
 							</button>
 						</div>
 					</TabsContent>
@@ -321,7 +321,7 @@ function CurveThumb({ value }: { value: NormalizedCubicBezier }) {
 			height={THUMB_HEIGHT}
 			viewBox={`0 0 ${THUMB_WIDTH} ${THUMB_HEIGHT}`}
 		>
-			<title>Curve preset preview</title>
+			<title><UiText text={"Curve preset preview"} /></title>
 			<path
 				d={`M${points.join("L")}`}
 				fill="none"
