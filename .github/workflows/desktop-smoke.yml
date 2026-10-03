@@ -1,0 +1,66 @@
+name: Desktop package smoke test
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Successful Desktop release workflow run ID
+        required: true
+permissions:
+  contents: read
+  actions: read
+jobs:
+  smoke:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.run_id }}
+          name: desktop-${{ runner.os }}
+          path: packages
+      - name: Verify Linux package and launch
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          sudo apt-get update && sudo apt-get install -y xvfb libgtk-3-0 libnss3 libasound2 rpm
+          dpkg-deb --info packages/*.deb
+          rpm -qpi packages/*.rpm
+          mkdir -p /tmp/opencut-smoke
+          dpkg-deb -x packages/*.deb /tmp/opencut-smoke
+          executable=$(find /tmp/opencut-smoke/opt -maxdepth 3 -type f -executable -name 'opencut*' | head -1)
+          test -n "$executable"
+          xvfb-run -a "$executable" --no-sandbox --disable-gpu > /tmp/opencut-smoke.log 2>&1 &
+          for attempt in $(seq 1 90); do
+            if curl --fail --silent http://127.0.0.1:3002/projects > /tmp/projects.html; then
+              grep -q '<html' /tmp/projects.html
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/opencut-smoke.log
+          find "$HOME/.config" -name server.log -exec cat {} \;
+          exit 1
+      - name: Install and launch Windows package
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $installer = (Get-ChildItem packages/*.exe)[0].FullName
+          $destination = Join-Path $env:RUNNER_TEMP 'OpenCutSmoke'
+          Start-Process -FilePath $installer -ArgumentList '/S', "/D=$destination" -Wait
+          $executable = Join-Path $destination 'OpenCut AI.exe'
+          if (!(Test-Path $executable)) { throw 'Installer did not create application' }
+          $process = Start-Process -FilePath $executable -PassThru
+          for ($attempt = 0; $attempt -lt 90; $attempt++) {
+            try {
+              $response = Invoke-WebRequest http://127.0.0.1:3002/projects
+              if ($response.StatusCode -eq 200 -and $response.Content.Contains('<html')) { Stop-Process -Id $process.Id -ErrorAction SilentlyContinue; exit 0 }
+            } catch {}
+            Start-Sleep 1
+          }
+          Get-ChildItem $env:APPDATA -Filter server.log -Recurse -ErrorAction SilentlyContinue | Get-Content
+          throw 'Packaged editor did not start'
