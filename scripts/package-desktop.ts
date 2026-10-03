@@ -68,4 +68,4 @@ await run([
 	".",
 ]);
 const platformArgs = process.platform === "win32" ? ["--win", "nsis", "--x64"] : process.platform === "linux" ? ["--linux", "deb", "rpm", "--x64"] : ["--mac", "--dir"];
-await run(["bun", "x", "electron-builder", "--config", "apps/electron/builder.json", ...platformArgs]);
+await run(["bun", "x", "electron-builder", "--config", "apps/electron/builder.json", "--publish", "never", ...platformArgs]);
