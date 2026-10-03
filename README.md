@@ -10,9 +10,9 @@ An open-source desktop video editor with AI storyboards, screen recording, edita
 - Local editing needs no subscription. AI generation requires your own provider/API credentials.
 - Screen/system-audio capture support depends on the operating system; Linux Wayland/portal support varies.
 
-## Latest release: 0.1.10
+## Latest release: 0.1.11
 
-Fixes macOS microphone capture permissions and reports unavailable microphone input. 修复 macOS 麦克风录音权限，并明确提示输入不可用。
+Edit subtitle content in the properties panel with immediate preview updates, undoable saves and matching exports. Includes the macOS microphone permission fix. 支持右侧字幕内容直接编辑、实时预览、撤销和导出同步，保留 macOS 麦克风权限修复。
 
 ## Reliability and balance controls (0.1.9)
 
@@ -35,9 +35,9 @@ These are presets in the code, **not guaranteed model availability**: check the 
 
 ## Downloads and product focus
 
-- [macOS Apple Silicon DMG](https://github.com/bennix/OpenCutAI/releases/download/v0.1.10/OpenCut-AI-0.1.10-arm64.dmg) — Developer ID signed and Apple notarized.
-- [Windows x64 installer](https://github.com/bennix/OpenCutAI/releases/download/v0.1.10/OpenCut-AI-0.1.10-x64-Setup.exe) — unsigned; SmartScreen may warn. Verify the release source and SHA256 checksum.
-- Linux x64: [DEB](https://github.com/bennix/OpenCutAI/releases/download/v0.1.10/OpenCut-AI-0.1.10-amd64.deb) / [RPM](https://github.com/bennix/OpenCutAI/releases/download/v0.1.10/OpenCut-AI-0.1.10-x86_64.rpm).
+- [macOS Apple Silicon DMG](https://github.com/bennix/OpenCutAI/releases/download/v0.1.11/OpenCut-AI-0.1.11-arm64.dmg) — Developer ID signed and Apple notarized.
+- [Windows x64 installer](https://github.com/bennix/OpenCutAI/releases/download/v0.1.11/OpenCut-AI-0.1.11-x64-Setup.exe) — unsigned; SmartScreen may warn. Verify the release source and SHA256 checksum.
+- Linux x64: [DEB](https://github.com/bennix/OpenCutAI/releases/download/v0.1.11/OpenCut-AI-0.1.11-amd64.deb) / [RPM](https://github.com/bennix/OpenCutAI/releases/download/v0.1.11/OpenCut-AI-0.1.11-x86_64.rpm).
 - Landing page: [English](https://bennix.github.io/OpenCutAI/en.html) / [中文](https://bennix.github.io/OpenCutAI/).
 
 OpenCut AI focuses on **screen recording → AI storyboards → timeline editing**, with placeholders, retries and optional frame continuity. It extends OpenCut Classic's editor foundation. CapCut targets broad creator editing/template workflows; Resolve is a stronger fit for professional grading and VFX. This is workflow positioning, not a benchmark or exhaustive feature comparison.
