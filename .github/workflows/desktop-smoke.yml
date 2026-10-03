@@ -5,6 +5,11 @@ on:
       run_id:
         description: Successful Desktop release workflow run ID
         required: true
+      platform:
+        description: Platform to verify
+        type: choice
+        options: [all, linux, windows]
+        default: all
 permissions:
   contents: read
   actions: read
@@ -13,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, windows-latest]
+        os: ${{ fromJSON(inputs.platform == 'linux' && '["ubuntu-22.04"]' || inputs.platform == 'windows' && '["windows-latest"]' || '["ubuntu-22.04", "windows-latest"]') }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     steps:
