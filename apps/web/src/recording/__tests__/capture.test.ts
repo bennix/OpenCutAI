@@ -1,6 +1,16 @@
 import { expect, mock, test } from "bun:test";
 mock.module("opencut-ai", () => ({
-	screenFocusCrop: () => JSON.stringify({ x: 0, y: 0, size: 1 }),
+	recordingHealth: () => "",
+ screenFocusCrop: () => JSON.stringify({ x: 0, y: 0, size: 1 }),
+}));
+const recorded = new Map<string, Blob[]>();
+const recordingNames = new Map<string,string>();
+const recordingMimes = new Map<string,string>();
+mock.module("../spool", () => ({
+ beginSpool: async (input:{name:string;mime:string}) => {const id=crypto.randomUUID();recorded.set(id,[]);recordingNames.set(id,input.name);recordingMimes.set(id,input.mime);return id;},
+ appendSpool: async (id:string,_index:number,blob:Blob) => {recorded.get(id)!.push(blob);},
+ finishSpool: async () => {},
+ readSpool: async (id:string) => new File(recorded.get(id)!,`${recordingNames.get(id)}.webm`,{type:recordingMimes.get(id)}),
 }));
 const { startCapture } = await import("../capture");
 class Track {

@@ -11,6 +11,9 @@ export const validateStoryboard: (a: number, b: number, c: number, d: number) =>
 export const build_transition: (a: number, b: number) => [number, number, number, number];
 export const compose_transitions: (a: number, b: number) => [number, number, number, number];
 export const transition_targets: (a: number, b: number) => [number, number, number, number];
+export const checkGenerationBudget: (a: number, b: number) => [number, number, number, number];
+export const queryRetryDelay: (a: number, b: number, c: number) => number;
+export const recordingHealth: (a: number, b: number, c: number) => [number, number];
 export const __wbindgen_externrefs: WebAssembly.Table;
 export const __wbindgen_malloc: (a: number, b: number) => number;
 export const __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;

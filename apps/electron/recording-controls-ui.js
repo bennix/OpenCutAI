@@ -10,3 +10,5 @@ stop.querySelector("small").textContent = displayShortcut(options.get("stop"));
 pause.onclick = () => window.recordingControls.action("pause");
 stop.onclick = () => { pause.disabled = true; stop.disabled = true; window.recordingControls.action("stop"); };
 window.recordingControls.onState(render);
+
+window.recordingControls.onHealth(message=>{document.querySelector("i").title=message;document.querySelector("i").style.background=message?"#ffbd59":"#f45f6c";document.body.title=message;document.getElementById("health").textContent=message;});

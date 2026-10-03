@@ -22,6 +22,7 @@ function createRecordingControls({ BrowserWindow, screen, globalShortcut, getWin
 		end,
 		isSender: (event) => !!panel && event.sender === panel.webContents,
 		send,
+		setHealth(message) { panel?.webContents.send("opencut-controls-health", message); },
 		setPaused(paused) { panel?.webContents.send("opencut-controls-state", !!paused); },
 		async begin(input) {
 			if (panel) return;

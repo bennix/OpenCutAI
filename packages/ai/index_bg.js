@@ -77,6 +77,31 @@ export function build_transition(input) {
  * @param {string} input
  * @returns {string}
  */
+export function checkGenerationBudget(input) {
+    let deferred3_0;
+    let deferred3_1;
+    try {
+        const ptr0 = passStringToWasm0(input, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.checkGenerationBudget(ptr0, len0);
+        var ptr2 = ret[0];
+        var len2 = ret[1];
+        if (ret[3]) {
+            ptr2 = 0; len2 = 0;
+            throw takeFromExternrefTable0(ret[2]);
+        }
+        deferred3_0 = ptr2;
+        deferred3_1 = len2;
+        return getStringFromWasm0(ptr2, len2);
+    } finally {
+        wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
+    }
+}
+
+/**
+ * @param {string} input
+ * @returns {string}
+ */
 export function compose_transitions(input) {
     let deferred3_0;
     let deferred3_1;
@@ -149,6 +174,36 @@ export function fitStoryboardToDuration(input, max_seconds) {
         return getStringFromWasm0(ptr2, len2);
     } finally {
         wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
+    }
+}
+
+/**
+ * @param {number} status
+ * @param {number} attempt
+ * @param {number} retry_after
+ * @returns {number}
+ */
+export function queryRetryDelay(status, attempt, retry_after) {
+    const ret = wasm.queryRetryDelay(status, attempt, retry_after);
+    return ret;
+}
+
+/**
+ * @param {number} black_seconds
+ * @param {number} silent_seconds
+ * @param {boolean} muted
+ * @returns {string}
+ */
+export function recordingHealth(black_seconds, silent_seconds, muted) {
+    let deferred1_0;
+    let deferred1_1;
+    try {
+        const ret = wasm.recordingHealth(black_seconds, silent_seconds, muted);
+        deferred1_0 = ret[0];
+        deferred1_1 = ret[1];
+        return getStringFromWasm0(ret[0], ret[1]);
+    } finally {
+        wasm.__wbindgen_free(deferred1_0, deferred1_1, 1);
     }
 }
 

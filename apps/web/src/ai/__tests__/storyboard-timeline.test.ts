@@ -1,6 +1,8 @@
+import "fake-indexeddb/auto";
 import { expect, mock, test } from "bun:test";
 mock.module("opencut-ai", () => ({
-	buildStoryboardRequest: () => "{}",
+	checkGenerationBudget:()=>JSON.stringify({allowed:true}),
+ buildStoryboardRequest: () => "{}",
 	validateStoryboard: (input: string) => input,
 	fitStoryboardToDuration: (input: string) => input,
 	build_transition: () => "[]",
@@ -207,7 +209,7 @@ async function environment(run: () => Promise<void>) {
 	Object.defineProperty(globalThis, "localStorage", {
 		configurable: true,
 		value: {
-			getItem: () =>
+			getItem: (key:string) => key!=="opencut-ai-settings"?null:
 				JSON.stringify({
 					models: [
 						{ id: "minimax/minimax-h3-max", kind: "video", maxShotSeconds: 15 },

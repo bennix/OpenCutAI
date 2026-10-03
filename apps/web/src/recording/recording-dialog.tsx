@@ -1,4 +1,5 @@
 "use client";
+import { listSpools, readSpool, removeSpool, type SpoolEntry } from "./spool";
 import { createPortal } from "react-dom";
 import { getLocale } from "@/i18n/locale";
 import { readRecordingShortcuts, matchesRecordingShortcut } from "./shortcuts";
@@ -48,6 +49,81 @@ export function RecordingDialog() {
 		"idle" | "starting" | "recording" | "paused" | "saving"
 	>("idle");
 	const [error, setError] = useState("");
+	const [health, setHealth] = useState("");
+	const [recoveries, setRecoveries] = useState<SpoolEntry[]>([]);
+	useEffect(() => {
+		void listSpools()
+			.then(setRecoveries)
+			.catch(() => {});
+	}, []);
+	async function recover(entry: SpoolEntry) {
+		setState("saving");
+		try {
+			const targetProject = editor.project.getActive().metadata.id,
+				targetScene = editor.scenes.getActiveScene().id,
+				targetTime = editor.playback.getCurrentTime();
+			const file = await readSpool(entry.id),
+				assets = await processMediaAssets({ files: [file] });
+			if (
+				editor.project.getActive().metadata.id !== targetProject ||
+				editor.scenes.getActiveScene().id !== targetScene
+			)
+				throw new Error("项目或场景已切换，恢复文件保留，请在目标项目重试");
+			if (assets.length !== 1)
+				throw new Error("恢复文件无法解码，文件仍保留，可下载备份");
+			const saved = await editor.media.addMediaAsset({
+				projectId: targetProject,
+				asset: assets[0],
+			});
+			if (!saved) throw new Error("恢复素材保存失败");
+			if (!Number.isFinite(saved.duration) || !(saved.duration! > 0))
+				throw new Error("恢复素材时长无效，原文件保留，可下载备份");
+			if (
+				editor.project.getActive().metadata.id !== targetProject ||
+				editor.scenes.getActiveScene().id !== targetScene
+			)
+				throw new Error("项目或场景已切换，恢复文件保留");
+			const track = new AddTrackCommand({
+				type: saved.type === "audio" ? "audio" : "video",
+			});
+			const element = buildElementFromMedia({
+				mediaId: saved.id,
+				mediaType: saved.type,
+				name: saved.name,
+				duration: mediaTimeFromSeconds({ seconds: saved.duration ?? 0 }),
+				startTime: targetTime,
+			});
+			editor.command.execute({
+				command: new BatchCommand([
+					track,
+					new InsertElementCommand({
+						element,
+						placement: { mode: "explicit", trackId: track.getTrackId() },
+					}),
+				]),
+			});
+			await editor.save.flush();
+			await removeSpool(entry.id);
+			setRecoveries(await listSpools());
+		} catch (e) {
+			setError(e instanceof Error ? e.message : String(e));
+		} finally {
+			setState("idle");
+		}
+	}
+	async function backupRecovery(entry: SpoolEntry) {
+		const targetProject = editor.project.getActive().metadata.id,
+			targetScene = editor.scenes.getActiveScene().id,
+			targetTime = editor.playback.getCurrentTime();
+		const file = await readSpool(entry.id),
+			url = URL.createObjectURL(file),
+			a = document.createElement("a");
+		a.href = url;
+		a.download = file.name;
+		a.click();
+		setTimeout(() => URL.revokeObjectURL(url), 60000);
+	}
+
 	const [availability, setAvailability] = useState<
 		"checking" | "ready" | "permission" | "restart" | "error"
 	>("checking");
@@ -185,6 +261,9 @@ export function RecordingDialog() {
 		setOpen(true);
 		setError("");
 		await checkAvailability(true);
+		void listSpools()
+			.then(setRecoveries)
+			.catch(() => {});
 	}
 	async function stop() {
 		if (!session.current || stopping.current) return;
@@ -233,6 +312,10 @@ export function RecordingDialog() {
 					]),
 				});
 			}
+			await editor.save.flush();
+			for (const entry of files)
+				if (entry.recoveryId) await removeSpool(entry.recoveryId);
+			setRecoveries(await listSpools());
 			setOpen(false);
 		} catch (error) {
 			const message = error instanceof Error ? error.message : String(error);
@@ -242,7 +325,11 @@ export function RecordingDialog() {
 					: message,
 			);
 		} finally {
+			session.current = null;
 			stopping.current = false;
+			void listSpools()
+				.then(setRecoveries)
+				.catch(() => {});
 			setState("idle");
 		}
 	}
@@ -261,6 +348,17 @@ export function RecordingDialog() {
 				microphone: mic,
 				smartFocus: focus && mode !== "mirror" && !!window.opencutDesktop,
 				region: mode === "region" ? region : full,
+				onHealth: (message, fatal) => {
+					setHealth(message);
+					window.opencutDesktop?.setRecordingHealth?.(message);
+					if (fatal) {
+						setError(message);
+						setOpen(true);
+						queueMicrotask(() => {
+							void actions.current.stop();
+						});
+					}
+				},
 				onEnded: () => {
 					void stop();
 				},
@@ -331,7 +429,10 @@ export function RecordingDialog() {
 					if (!busy) setOpen(value);
 				}}
 			>
-				<DialogContent className="max-w-2xl" aria-describedby={undefined}>
+				<DialogContent
+					className="max-w-2xl max-h-[90vh] overflow-y-auto"
+					aria-describedby={undefined}
+				>
 					<DialogHeader>
 						<DialogTitle>{t("Screen recording")}</DialogTitle>
 					</DialogHeader>
@@ -509,10 +610,62 @@ export function RecordingDialog() {
 								<Button variant="outline" onClick={() => void show()}>
 									{t("Refresh capture sources")}
 								</Button>
-								<Button variant="outline" onClick={() => void window.opencutDesktop?.restartApp()}>
+								<Button
+									variant="outline"
+									onClick={() => void window.opencutDesktop?.restartApp()}
+								>
 									{t("Restart OpenCut AI")}
 								</Button>
 							</div>
+						)}
+						{health && (
+							<p role="status" className="text-amber-500 text-sm">
+								{health}
+							</p>
+						)}
+						{!busy && recoveries.length > 0 && (
+							<section className="border rounded p-3 space-y-2">
+								<h3>可恢复的录屏</h3>
+								<p className="text-xs text-muted-foreground">
+									录屏中断或导入失败的数据保留在本机；恢复后可继续编辑。
+								</p>
+								{recoveries.map((entry) => (
+									<div
+										key={entry.id}
+										className="flex flex-wrap gap-2 items-center text-xs"
+									>
+										<span>
+											{entry.name} · {(entry.bytes / 1048576).toFixed(1)} MB
+										</span>
+										<Button size="sm" onClick={() => void recover(entry)}>
+											恢复到当前项目
+										</Button>
+										<Button
+											size="sm"
+											variant="outline"
+											onClick={() => void backupRecovery(entry)}
+										>
+											下载备份
+										</Button>
+										<Button
+											size="sm"
+											variant="ghost"
+											onClick={() => {
+												if (
+													window.confirm(
+														"删除这份录屏恢复文件？请先备份，此操作不可撤销。",
+													)
+												)
+													void removeSpool(entry.id)
+														.then(() => listSpools())
+														.then(setRecoveries);
+											}}
+										>
+											删除恢复文件
+										</Button>
+									</div>
+								))}
+							</section>
 						)}
 						{error && (
 							<p role="alert" className="text-destructive">

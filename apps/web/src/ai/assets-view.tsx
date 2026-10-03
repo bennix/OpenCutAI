@@ -1,4 +1,6 @@
 "use client";
+import { estimateGeneration } from "./budget";
+import { loadTasks } from "./tasks";
 import { getDefaultModel } from "./settings";
 import { UiText, useTranslation } from "@/i18n";
 
@@ -79,16 +81,19 @@ export function AiAssetsView() {
 	const [jobs, setJobs] = useState<VideoJob[]>([]);
 	const abort = useRef<AbortController | null>(null);
 	const refresh = async () => {
+		await loadTasks();
 		setLibrary(
 			(await listGeneratedAssets()).sort((a, b) => b.created - a.created),
 		);
 		setJobs(pendingJobs());
 	};
 	useEffect(() => {
-		void listGeneratedAssets().then((assets) => {
-			setLibrary(assets.sort((a, b) => b.created - a.created));
-			setJobs(pendingJobs());
-		});
+		void loadTasks()
+			.then(() => listGeneratedAssets())
+			.then((assets) => {
+				setLibrary(assets.sort((a, b) => b.created - a.created));
+				setJobs(pendingJobs());
+			});
 		return () => {
 			abort.current?.abort();
 		};
@@ -333,6 +338,16 @@ export function AiAssetsView() {
 						</p>
 					</>
 				)}
+				<p className="text-xs text-muted-foreground">
+					预计费用：
+					{estimateGeneration(
+						chosen,
+						duration ? Number(duration) : undefined,
+					) === null
+						? "未知（可在设置配置模型单价）"
+						: `US$ ${estimateGeneration(chosen, duration ? Number(duration) : undefined)!.toFixed(3)}`}
+					，以服务商实际结算为准。
+				</p>
 				<div className="flex gap-2">
 					<Button
 						disabled={busy || !prompt.trim() || !chosen}
@@ -450,8 +465,18 @@ export function AiAssetsView() {
 								size="sm"
 								variant="ghost"
 								onClick={async () => {
-									await deleteGeneratedAsset(asset.id);
-									await refresh();
+									if (
+										!window.confirm(
+											"移出 AI 库会删除本地生成原文件。请先下载备份，确认继续？",
+										)
+									)
+										return;
+									try {
+										await deleteGeneratedAsset(asset.id);
+										await refresh();
+									} catch (e) {
+										toast.error(e instanceof Error ? e.message : String(e));
+									}
 								}}
 							>
 								<UiText text="移出 AI 库" />

@@ -10,6 +10,7 @@ const {
 	screen,
 	systemPreferences,
 	globalShortcut,
+	safeStorage,
 } = require("electron");
 const path = require("node:path");
 const fs = require("node:fs");
@@ -76,6 +77,7 @@ ipcMain.on("opencut-language", (event, language) => {
 const { createRecordingControls } = require("./recording-controls.cjs");
 const recordingControls = createRecordingControls({ BrowserWindow, screen, globalShortcut, getWindow: () => window });
 ipcMain.handle("opencut-recording-controls", (event, input) => { captureSender(event); if (!captureSelection) throw new Error("No active recording"); return recordingControls.begin(input); });
+ipcMain.on("opencut-recording-health", (event,message)=>{captureSender(event);if(typeof message!=="string"||message.length>500)return;recordingControls.setHealth(message);});
 ipcMain.on("opencut-recording-paused", (event, paused) => { captureSender(event); recordingControls.setPaused(paused); });
 ipcMain.on("opencut-controls-action", (event, action) => { if (recordingControls.isSender(event) && ["pause", "stop"].includes(action)) recordingControls.send(action); });
 let captureSelection;
@@ -133,6 +135,22 @@ ipcMain.handle("opencut-capture-cursor", (event) => {
 	return {x: (cursor.x - display.bounds.x) / display.bounds.width, y: (cursor.y - display.bounds.y) / display.bounds.height};
 });
 ipcMain.handle("opencut-capture-end", (event) => { captureSender(event); captureSelection = undefined; recordingControls.end(); window.webContents.setBackgroundThrottling(true); });
+
+const reliability = require("./reliability.cjs").createReliability({root: app.getPath("userData"), safeStorage});
+for (const [channel, action] of Object.entries({
+ "credential-status": input => reliability.credentialStatus(input),
+ "credential-save": input => reliability.saveCredential(input),
+ "ai-request": input => reliability.request(input),
+ "ai-management": input => reliability.management(input),
+ "ai-cancel": input => reliability.cancel(input),
+ "ai-media": input => reliability.media(input),
+ "recording-begin": input => reliability.begin(input),
+ "recording-append": input => reliability.append(input),
+ "recording-finish": input => reliability.finish(input),
+ "recording-list": () => reliability.list(),
+ "recording-read": input => reliability.read(input),
+ "recording-remove": input => reliability.remove(input),
+})) ipcMain.handle("opencut-" + channel, (event, input) => { captureSender(event); return action(input); });
 
 async function waitForServer() {
 	for (let attempt = 0; attempt < 120; attempt++) {

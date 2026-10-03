@@ -1,4 +1,5 @@
 "use client";
+import { ContinuityPicker } from "./continuity-picker";
 import { useEffect, useRef, useState } from "react";
 import { UiText, useTranslation } from "@/i18n";
 import { useEditor } from "@/editor/use-editor";
@@ -564,12 +565,13 @@ export function DirectorView() {
 											<span>
 												<UiText text="Use this shot's last frame as the next shot's opening reference" />
 												<span className="block text-xs text-muted-foreground">
-													<UiText text="Applies when generating the next shot. Disable to generate it independently; existing videos are retained." />
+													<UiText text="生成下一段时会把参考帧上传给 AI 服务商。请确认画面没有敏感信息；关闭后独立生成。" />
 												</span>
 											</span>
 										</label>
 									)}
-									{(draft.plan.characters ?? []).length > 0 && (
+									<ContinuityPicker shot={shot} disabled={busy} onChange={patch=>updateShot({index,patch})}/>
+                                    {(draft.plan.characters ?? []).length > 0 && (
 										<fieldset>
 											<legend>
 												<UiText text="Bound characters" />

@@ -120,9 +120,11 @@ interface Secret {
 	iv: Uint8Array<ArrayBuffer>;
 	encrypted: ArrayBuffer;
 }
-export async function saveApiKey(value: string) {
+export async function saveApiKey(value: string,kind:"generation"|"management"="generation") {
+ const desktop = typeof window !== "undefined" ? window.opencutDesktop : undefined;
+ if (desktop) { if (!desktop.saveCredential) throw new Error("Restart the desktop app to enable system credential storage"); await desktop.saveCredential({kind,value}); await vault({mode:"readwrite",action:s=>s.delete(kind==="management"?"management-secret":"secret")}); return; }
 	if (!value.trim()) {
-		await vault({ mode: "readwrite", action: (s) => s.delete("secret") });
+		await vault({ mode: "readwrite", action: (s) => s.delete(kind==="management"?"management-secret":"secret") });
 		return;
 	}
 	const key = await crypto.subtle.generateKey(
@@ -138,14 +140,26 @@ export async function saveApiKey(value: string) {
 	);
 	await vault({
 		mode: "readwrite",
-		action: (s) => s.put({ key, iv, encrypted }, "secret"),
+		action: (s) => s.put({ key, iv, encrypted }, kind==="management"?"management-secret":"secret"),
 	});
 	await navigator.storage?.persist?.();
 }
-export async function readApiKey(): Promise<string> {
+export async function readApiKey(kind:"generation"|"management"="generation"): Promise<string> {
+ if (typeof window !== "undefined" && window.opencutDesktop) throw new Error("Desktop credentials are available only to the main process");
+ return readLegacyApiKey(kind);
+}
+export async function migrateDesktopCredential(): Promise<void> {
+ const desktop = typeof window !== "undefined" ? window.opencutDesktop : undefined;
+ if (!desktop?.credentialStatus) return;
+ const status = await desktop.credentialStatus();
+ const legacy = await readLegacyApiKey();
+ if (legacy && !status.saved) await desktop.saveCredential(legacy);
+ if (legacy) await vault({mode:"readwrite",action:s=>s.delete("secret")});
+}
+async function readLegacyApiKey(kind:"generation"|"management"="generation"): Promise<string> {
 	const secret = await vault<Secret | undefined>({
 		mode: "readonly",
-		action: (s) => s.get("secret"),
+		action: (s) => s.get(kind==="management"?"management-secret":"secret"),
 	});
 	if (!secret) return "";
 	return new TextDecoder().decode(

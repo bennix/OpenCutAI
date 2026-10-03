@@ -1,6 +1,8 @@
+import "fake-indexeddb/auto";
 import { expect, mock, test } from "bun:test";
 import type { EditorCore } from "@/core";
 mock.module("opencut-ai", () => ({
+	queryRetryDelay: () => -1,
 	buildGenerationRequest: () =>
 		JSON.stringify({
 			path: "/api/v1/videos",
@@ -30,8 +32,15 @@ mock.module("@/timeline/element-utils", () => ({
 	buildElementFromMedia: () => ({}),
 }));
 let calls = 0;
+let unknown = false;
 mock.module("../transport", () => ({
+	generationPreflight: async () => {},
+	ZenmuxError: class extends Error {},
 	zenmux: async () => {
+		if (unknown) {
+			calls++;
+			throw new Error("Submission connection failed");
+		}
 		if (++calls === 1) return { id: "paid-task", status: "queued" };
 		throw new Error("Polling connection failed");
 	},
@@ -48,6 +57,7 @@ test("a submitted task survives a polling failure without decoding its queued su
 		value: {
 			getItem: (key: string) => values.get(key) ?? null,
 			setItem: (key: string, value: string) => values.set(key, value),
+			removeItem: (key: string) => values.delete(key),
 		},
 	});
 	calls = 0;
@@ -75,6 +85,44 @@ test("a submitted task survives a polling failure without decoding its queued su
 	} finally {
 		if (descriptor)
 			Object.defineProperty(globalThis, "localStorage", descriptor);
+		else Reflect.deleteProperty(globalThis, "localStorage");
+	}
+});
+
+test("unknown paid submission blocks retry and new-version bypass", async () => {
+	const previous = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
+	Object.defineProperty(globalThis, "localStorage", {
+		configurable: true,
+		value: { getItem: () => null },
+	});
+	unknown = true;
+	calls = 0;
+	const editor = {
+		project: { getActive: () => ({ metadata: { id: "project-unknown" } }) },
+		media: { getAssets: () => [] },
+	} as unknown as EditorCore;
+	const args = {
+		editor,
+		input: {
+			kind: "video" as const,
+			model: "minimax/minimax-h3-max",
+			prompt: "unknown-scene",
+		},
+		signal: new AbortController().signal,
+		status: () => {},
+	};
+	try {
+		await expect(generate(args)).rejects.toThrow(
+			"Submission connection failed",
+		);
+		await expect(generate(args)).rejects.toThrow("未知");
+		await expect(
+			generate({ ...args, input: { ...args.input, newVersion: true } }),
+		).rejects.toThrow("未知");
+		expect(calls).toBe(1);
+	} finally {
+		unknown = false;
+		if (previous) Object.defineProperty(globalThis, "localStorage", previous);
 		else Reflect.deleteProperty(globalThis, "localStorage");
 	}
 });

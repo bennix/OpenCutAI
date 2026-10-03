@@ -1,6 +1,7 @@
 "use client";
 import { UiText, localize, useTranslation } from "@/i18n";
 
+import { BudgetMonitor } from "@/ai/budget-monitor";
 import { RecordingDialog } from "@/recording/recording-dialog";
 import { Button } from "../ui/button";
 import { useRef, useState } from "react";
@@ -31,7 +32,8 @@ export function EditorHeader() {
 	return (
 		<header className="bg-background flex h-[3.4rem] items-center justify-between px-3 pt-0.5">
 			<div className="flex items-center gap-1">
-				<ProjectDropdown />
+				<BudgetMonitor />
+                <ProjectDropdown />
 				<EditableProjectName />
 			</div>
 			<nav className="flex items-center gap-2">

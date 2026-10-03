@@ -1,3 +1,4 @@
+import {loadTasks} from "./tasks";
 import { previousShotReference } from "./continuity";
 import { BatchCommand } from "@/commands/batch-command";
 import { AddTrackCommand } from "@/commands/timeline/track/add-track";
@@ -38,6 +39,8 @@ export interface DirectorShot {
 	characterIds?: string[];
 	firstFrameAssetId?: string;
 	continueToNext?: boolean;
+ continuationFrameAssetId?:string;
+ continuationTime?:number;
 	error?: string;
 	motion: string;
 	continuity: string;
@@ -312,7 +315,8 @@ export async function generateStoryboardAssets({
 					throw new Error(
 						"Configure model duration and split the storyboard first",
 					);
-				let library = await listGeneratedAssets();
+				await loadTasks();
+    let library = await listGeneratedAssets();
 				const previous = library.find((asset) => asset.id === shot.assetId);
 				if (kind === "video" && previous?.blob.type.startsWith("image/")) {
 					shot.firstFrameAssetId ??= previous.id;

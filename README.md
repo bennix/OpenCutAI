@@ -10,6 +10,12 @@ An open-source desktop video editor with AI storyboards, screen recording, edita
 - Local editing needs no subscription. AI generation requires your own provider/API credentials.
 - Screen/system-audio capture support depends on the operating system; Linux Wayland/portal support varies.
 
+## Reliability and balance controls (current source)
+
+AI Settings includes a separate [ZenMux Management API Key](https://zenmux.ai/platform/management), balance/monthly PAYG queries, low-balance alerts and client submission budgets. Source changes also add persistent recording recovery, a generation task journal, safe storage cleanup and selectable continuity frames. Desktop credentials use OS-protected storage and main-process requests. [Setup and practical limits](docs/RELIABILITY.md). These changes are not included in the existing 0.1.8 installers.
+
+当前源码新增：余额监控与预算设置、录屏持久化恢复、生成任务中心、素材空间与备份、系统保护凭据和续接选帧。[配置与限制说明](docs/RELIABILITY.md)。已有 0.1.8 安装包尚未包含这些改动。
+
 ## AI integration and limits
 
 The current application connects through **[ZenMux](https://zenmux.ai)** (`https://zenmux.ai/api/v1`). Save a **ZenMux API Key** in Settings → ZenMux AI; separate provider keys are not required. Model calls are billed to your ZenMux account. Prompts and reference media leave your device; keys are stored locally and excluded from project exports.

@@ -15,6 +15,10 @@ import {
 	type AiKind,
 } from "./settings";
 import { useAiSettings } from "./use-settings";
+import { StorageView } from "./storage-view";
+import { TaskCenter } from "./task-center";
+import { BudgetView } from "./budget-view";
+import { readBudget, saveBudget } from "./budget";
 import { zenmux } from "./transport";
 export function AiSettingsView() {
 	const t = useTranslation();
@@ -31,9 +35,10 @@ export function AiSettingsView() {
 			if (event instanceof CustomEvent) setMcpStatus(event.detail);
 		};
 		window.addEventListener("opencut-mcp-status", onMcpStatus);
-		void readApiKey()
-			.then(setKey)
-			.catch(() => toast.error(localize("无法读取本地凭据")));
+		if (!window.opencutDesktop)
+			void readApiKey()
+				.then(setKey)
+				.catch(() => toast.error(localize("无法读取本地凭据")));
 		return () => window.removeEventListener("opencut-mcp-status", onMcpStatus);
 	}, []);
 	if (!settings) return null;
@@ -65,6 +70,7 @@ export function AiSettingsView() {
 						setBusy(true);
 						try {
 							await saveApiKey(key);
+							setKey("");
 							toast.success(
 								key.trim()
 									? t("API Key 已加密保存到本机")
@@ -107,8 +113,17 @@ export function AiSettingsView() {
 				<UiText text="没有 API Key？通过邀请链接注册 ZenMux" />
 			</a>
 			<p className="text-muted-foreground text-xs">
-				<UiText text="密钥以 AES-GCM 加密存入此浏览器；解密用的不可导出密钥也在本机。页面脚本仍可使用凭据。清除站点数据或换浏览器会丢失设置，请保留原始密钥。" />
+				<UiText
+					text={
+						typeof window !== "undefined" && window.opencutDesktop
+							? "桌面版使用系统保护的凭据存储，已保存密钥不会回传编辑器。输入新密钥可替换，保存空值可删除。"
+							: "网页版凭据加密保存在此浏览器；页面脚本仍可使用凭据。清除站点数据会丢失设置。"
+					}
+				/>
 			</p>
+			<BudgetView />
+			<TaskCenter />
+			<StorageView />
 			<h4 className="font-medium">
 				<UiText text="Default generation models" />
 			</h4>
@@ -239,6 +254,31 @@ export function AiSettingsView() {
 						/>
 						{available && (available.includes(m.id) ? " ✓" : ` ${t("未列出")}`)}
 					</span>
+					{m.kind !== "edit" && (
+						<label className="text-xs">
+							价格估算（USD / {m.kind === "video" ? "秒" : "次"}）
+							<Input
+								type="number"
+								min={0}
+								step="any"
+								defaultValue={readBudget().prices[m.id]?.usd ?? ""}
+								onChange={(e) => {
+									const budget = readBudget();
+									const prices = { ...budget.prices };
+									if (e.target.value === "") delete prices[m.id];
+									else {
+										const usd = Number(e.target.value);
+										if (!Number.isFinite(usd) || usd < 0) return;
+										prices[m.id] = {
+											unit: m.kind === "video" ? "second" : "request",
+											usd,
+										};
+									}
+									saveBudget({ ...budget, prices });
+								}}
+							/>
+						</label>
+					)}
 					{m.kind === "video" && (
 						<label className="text-xs" htmlFor={`model-duration-${index}`}>
 							<UiText text="Model max shot seconds" />
