@@ -45,7 +45,14 @@ jobs:
       - name: Linux package tools
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y rpm
-      - run: bun install --frozen-lockfile
+      - name: Install dependencies
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            bun install --frozen-lockfile --linker hoisted
+          else
+            bun install --frozen-lockfile
+          fi
       - run: bun run scripts/package-desktop.ts
       - uses: actions/upload-artifact@v4
         with:
