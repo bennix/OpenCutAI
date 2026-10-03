@@ -5,14 +5,7 @@ concurrency:
   cancel-in-progress: true
 
 on:
-  push:
-    branches: [main]
-    paths-ignore:
-      - "*.md"
-  pull_request:
-    branches: [main]
-    paths-ignore:
-      - "*.md"
+  workflow_dispatch:
 
 jobs:
   build:
