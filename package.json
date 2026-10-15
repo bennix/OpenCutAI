@@ -57,5 +57,6 @@
   },
   "trustedDependencies": [
     "@tailwindcss/oxide"
-  ]
+  ],
+  "license": "GPL-3.0-only"
 }
