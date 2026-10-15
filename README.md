@@ -1,5 +1,10 @@
 # OpenCut AI
 
+> **License / 许可:** Original code authored by bennix: **GPL-3.0-only**.
+> Upstream and third-party material retain their original terms and notices.
+> See [LICENSE](LICENSE) and [LICENSING.md](LICENSING.md) for the current licensing scope.
+
+
 An open-source desktop video editor with AI storyboards, screen recording, editable subtitles, effects, transitions and persistent sound assets.
 
 **[Website](https://bennix.github.io/OpenCutAI/) · [Download](https://github.com/bennix/OpenCutAI/releases/latest)**
